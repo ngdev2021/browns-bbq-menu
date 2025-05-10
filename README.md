@@ -1,17 +1,33 @@
-# Food Truck Menu Application
+# Brown's Bar-B-Cue Food Truck Menu
 
-A modern, responsive food truck menu application built with Next.js, TypeScript, Tailwind CSS, and Framer Motion. This application provides a beautiful user interface for browsing menu items, filtering by categories, and placing orders.
+A modern, responsive menu application for Brown's Bar-B-Cue food truck, built with Next.js, TypeScript, and Tailwind CSS. This application provides a beautiful user interface for browsing authentic BBQ menu items, filtering by categories, and placing orders.
 
 ## Features
 
+- **Authentic BBQ Menu**: Showcases Brown's Bar-B-Cue authentic BBQ items including brisket, ribs, chicken, and traditional sides.
+- **Digital Menu Board**: Includes a dedicated digital menu board for in-store displays with rotating specials.
+- **Multiple Portion Sizes for Sides**: Displays different portion options (5 oz., Pint, Quart, Gallon) with corresponding prices.
 - **Beautiful UI with Time-of-Day Theming**: The application adapts its color scheme based on the time of day (morning, day, evening).
 - **Responsive Design**: Works seamlessly on mobile, tablet, and desktop devices.
 - **Offline Support**: Uses IndexedDB and Service Workers to function even without an internet connection.
-- **Real-time Updates**: Connects to Supabase for real-time menu updates.
-- **Interactive Animations**: Smooth animations and transitions using Framer Motion.
-- **Advanced Filtering**: Filter menu items by category, search query, and dietary preferences.
+- **Interactive Animations**: Smooth animations and transitions for an engaging user experience.
+- **Advanced Filtering**: Filter menu items by category (BBQ Plates, Sandwiches, Sides, Combos).
 - **Cart Management**: Add items to cart with animated feedback, adjust quantities, and view order total.
 - **Accessibility**: Built with accessibility in mind, including proper ARIA attributes and keyboard navigation.
+
+## BBQ Menu Highlights
+
+- **BBQ Plates**: Brisket, Ribs, Chicken, Turkey Leg, Pork Chops, and Links
+- **BBQ Sandwiches**: Brisket, Ribs, and Chicken
+- **Combo Specials**: 2, 3, or 4 meats with sides
+- **Sides**: Beans, Potato Salad, and Dirty Rice (available in multiple portion sizes)
+
+### Side Portion Sizes
+
+- 5 oz.: $4.25
+- Pint: $9.00
+- Quart: $17.00
+- Gallon: $45.00
 
 ## Getting Started
 
@@ -31,13 +47,26 @@ A modern, responsive food truck menu application built with Next.js, TypeScript,
    ```
 5. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
+## Digital Menu Board
+
+The application includes a dedicated digital menu board designed for in-store displays. This feature is perfect for food trucks and quick-service restaurants.
+
+### Digital Menu Features
+
+- **Fullscreen Mode**: Toggle fullscreen display for monitors (press 'F' key)
+- **Rotating Specials**: Automatically cycles through daily specials
+- **Staff Controls**: Hidden controls for staff to manage the display
+- **Day-of-Week Specials**: Automatically updates based on current day
+- **Real-time Clock**: Shows current time to customers
+- **Multiple Views**: Switch between full menu, specials, and combo deals
+
+Access the digital menu board at: `/digital-menu`
+
 ## Tech Stack
 
 - **Next.js**: React framework for server-rendered applications
 - **TypeScript**: For type safety and better developer experience
 - **Tailwind CSS**: Utility-first CSS framework for rapid UI development
-- **Framer Motion**: Animation library for React
-- **Supabase**: Backend as a service for real-time database
 - **IndexedDB**: For offline data storage
 - **Service Workers**: For offline functionality and caching
 
