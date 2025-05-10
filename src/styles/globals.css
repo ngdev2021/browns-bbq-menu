@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --accent-morning: #D84315; /* Warm orange-red for morning */
+  --accent-day: #B71C1C; /* Deep red for day */
+  --accent-evening: #4E342E; /* Dark brown for evening */
+  --bbq-primary: #B71C1C; /* Primary BBQ red */
+  --bbq-secondary: #4E342E; /* Secondary BBQ brown */
+  --bbq-accent: #FF6F00; /* Accent BBQ orange */
+}
+
+body {
+  @apply bg-charcoal-900 text-white;
+}
+
+.container {
+  @apply px-4 mx-auto max-w-7xl;
+}
