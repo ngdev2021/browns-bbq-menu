@@ -155,14 +155,14 @@ export const SAMPLE_MENU_ITEMS = [
   {
     id: '7',
     name: 'Stuffed Turkey Leg',
-    description: 'Giant smoked turkey leg stuffed with our signature cornbread dressing and smothered in BBQ sauce.',
-    price: 18.00,
+    description: 'Giant smoked turkey leg stuffed with your choice of mac & cheese, Alfredo shrimp, or crawfish mac & cheese. A Black culture specialty and rodeo favorite!',
+    price: 22.00,
     category: 'plates',
     image_url: LOCAL_IMAGES['turkey-leg'],
-    tags: ['bbq', 'meat', 'specialty'],
+    tags: ['bbq', 'meat', 'specialty', 'cultural'],
     stock: 10,
     featured: true,
-    ingredients: ['Turkey leg', 'Cornbread dressing', 'BBQ sauce', 'Special seasonings'],
+    ingredients: ['Smoked turkey leg', 'Choice of stuffing: mac & cheese, Alfredo shrimp, or crawfish mac & cheese', 'Special seasonings', 'BBQ sauce'],
     nutritionalInfo: {
       calories: 650,
       protein: 55,
