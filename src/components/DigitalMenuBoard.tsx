@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { SAMPLE_MENU_ITEMS } from '../data/sampleData';
+import { getMenuItems, getDigitalMenuSettings, getFeaturedMenuItems, MenuItem } from '../lib/menuService';
 
 interface DigitalMenuBoardProps {
   view?: 'menu' | 'specials' | 'combos';
@@ -10,7 +10,16 @@ const DigitalMenuBoard: React.FC<DigitalMenuBoardProps> = ({ view = 'menu' }) =>
   const [currentSpecialIndex, setCurrentSpecialIndex] = useState(0);
   
   // Featured items for rotating specials
-  const featuredItems = SAMPLE_MENU_ITEMS.filter(item => item.featured);
+  const [menuItems, setMenuItems] = useState<MenuItem[]>(getMenuItems());
+  const [featuredItems, setFeaturedItems] = useState<MenuItem[]>(getFeaturedMenuItems());
+  const [settings, setSettings] = useState(getDigitalMenuSettings());
+  
+  // Refresh menu data when component mounts
+  useEffect(() => {
+    setMenuItems(getMenuItems());
+    setFeaturedItems(getFeaturedMenuItems());
+    setSettings(getDigitalMenuSettings());
+  }, []);
   
   // Update time every minute
   useEffect(() => {
@@ -21,28 +30,28 @@ const DigitalMenuBoard: React.FC<DigitalMenuBoardProps> = ({ view = 'menu' }) =>
     return () => clearInterval(timer);
   }, []);
   
-  // Rotate through specials every 8 seconds
+  // Rotate through specials based on settings
   useEffect(() => {
     const specialsTimer = setInterval(() => {
       setCurrentSpecialIndex(prevIndex => 
         prevIndex === featuredItems.length - 1 ? 0 : prevIndex + 1
       );
-    }, 8000);
+    }, settings.rotationInterval * 1000);
     
     return () => clearInterval(specialsTimer);
-  }, [featuredItems.length]);
+  }, [featuredItems.length, settings.rotationInterval]);
   
   // Group menu items by category
-  const categories = SAMPLE_MENU_ITEMS.reduce((acc, item) => {
+  const categories = menuItems.reduce((acc, item) => {
     if (!acc[item.category]) {
       acc[item.category] = [];
     }
     acc[item.category].push(item);
     return acc;
-  }, {} as Record<string, typeof SAMPLE_MENU_ITEMS>);
+  }, {} as Record<string, MenuItem[]>);
   
   // Format categories for display
-  const formatCategory = (category: string) => {
+  const formatCategory = (category: string): string => {
     switch(category) {
       case 'plates': return 'BBQ Plates';
       case 'sandwiches': return 'BBQ Sandwiches';
@@ -53,53 +62,57 @@ const DigitalMenuBoard: React.FC<DigitalMenuBoardProps> = ({ view = 'menu' }) =>
   };
   
   // Get day of week for daily special
-  const getDayOfWeek = () => {
+  const getDayOfWeek = (): string => {
     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     return days[currentTime.getDay()];
   };
   
   // Current special
-  const currentSpecial = featuredItems[currentSpecialIndex];
+  const currentSpecial = featuredItems[currentSpecialIndex] || (featuredItems.length > 0 ? featuredItems[0] : null);
 
   // Helper function to render today's special
-  const renderTodaySpecial = () => (
-    <div className="mb-8 bg-gradient-to-r from-amber-900 to-amber-800 p-4 rounded-lg">
-      <div className="flex justify-between items-center mb-2">
-        <h2 className="text-3xl font-bold text-white">{getDayOfWeek()} Special</h2>
-        <div className="animate-pulse bg-red-600 text-white px-3 py-1 rounded-full font-bold">
-          TODAY ONLY
+  const renderTodaySpecial = (): JSX.Element | null => {
+    if (!currentSpecial) return null;
+    
+    return (
+      <div className="mb-8 bg-gradient-to-r from-amber-900 to-amber-800 p-4 rounded-lg">
+        <div className="flex justify-between items-center mb-2">
+          <h2 className="text-3xl font-bold text-white">{getDayOfWeek()} Special</h2>
+          <div className="animate-pulse bg-red-600 text-white px-3 py-1 rounded-full font-bold">
+            TODAY ONLY
+          </div>
         </div>
-      </div>
-      
-      <div className="flex items-center">
-        <div className="relative w-32 h-32 rounded-lg overflow-hidden mr-4">
-          <img 
-            src={currentSpecial.image_url} 
-            alt={currentSpecial.name}
-            className="object-cover w-full h-full"
-          />
-        </div>
-        <div className="flex-1">
-          <h3 className="text-2xl font-bold text-amber-300">{currentSpecial.name}</h3>
-          <p className="text-gray-300">{currentSpecial.description}</p>
-          <div className="mt-2 flex justify-between items-center">
-            <span className="text-3xl font-bold text-amber-300">
-              ${currentSpecial.price.toFixed(2)}
-            </span>
-            <div className="bg-amber-700 text-white px-3 py-1 rounded-lg">
-              Limited Time
+        
+        <div className="flex items-center">
+          <div className="relative w-32 h-32 rounded-lg overflow-hidden mr-4">
+            <img 
+              src={currentSpecial.image_url} 
+              alt={currentSpecial.name}
+              className="object-cover w-full h-full"
+            />
+          </div>
+          <div className="flex-1">
+            <h3 className="text-2xl font-bold text-amber-300">{currentSpecial.name}</h3>
+            <p className="text-gray-300">{currentSpecial.description}</p>
+            <div className="mt-2 flex justify-between items-center">
+              <span className="text-3xl font-bold text-amber-300">
+                ${currentSpecial.price.toFixed(2)}
+              </span>
+              <div className="bg-amber-700 text-white px-3 py-1 rounded-lg">
+                Limited Time
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   // Render the full menu view with all categories
-  const renderFullMenuView = () => (
+  const renderFullMenuView = (): JSX.Element => (
     <>
       {/* Today's Special */}
-      {renderTodaySpecial()}
+      {currentSpecial && renderTodaySpecial()}
       
       {/* Menu Categories */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -109,13 +122,13 @@ const DigitalMenuBoard: React.FC<DigitalMenuBoardProps> = ({ view = 'menu' }) =>
               {formatCategory(category)}
             </h2>
             <div className="space-y-4">
-              {items.map(item => (
+              {items.map((item: MenuItem) => (
                 <div key={item.id} className="flex justify-between items-start">
                   <div>
                     <h3 className="text-xl font-bold text-white">{item.name}</h3>
-                    <p className="text-gray-400 text-sm">{item.description}</p>
+                    <p className="text-gray-300 text-sm">{item.description}</p>
                   </div>
-                  <div className="text-xl font-bold text-amber-300">
+                  <div className="text-2xl font-bold text-amber-500">
                     ${item.price.toFixed(2)}
                   </div>
                 </div>
@@ -128,20 +141,20 @@ const DigitalMenuBoard: React.FC<DigitalMenuBoardProps> = ({ view = 'menu' }) =>
   );
 
   // Render just the specials view
-  const renderSpecialsView = () => {
+  const renderSpecialsView = (): JSX.Element => {
     // Get all featured items
-    const allSpecials = SAMPLE_MENU_ITEMS.filter(item => item.featured);
+    const specialItems = menuItems.filter(item => item.featured);
     
     return (
       <>
-        {/* Today's Special */}
-        {renderTodaySpecial()}
+        {/* Today's Featured Special */}
+        {currentSpecial && renderTodaySpecial()}
         
         {/* All Specials */}
         <div className="mt-8">
           <h2 className="text-3xl font-bold text-amber-500 mb-6 text-center">All Current Specials</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {allSpecials.map(special => (
+            {specialItems.map((special: MenuItem) => (
               <div key={special.id} className="bg-gradient-to-r from-amber-900 to-amber-800 p-4 rounded-lg flex">
                 <div className="relative w-32 h-32 rounded-lg overflow-hidden mr-4 flex-shrink-0">
                   <img 
@@ -151,10 +164,10 @@ const DigitalMenuBoard: React.FC<DigitalMenuBoardProps> = ({ view = 'menu' }) =>
                   />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-2xl font-bold text-amber-300">{special.name}</h3>
-                  <p className="text-gray-300">{special.description}</p>
-                  <div className="mt-2 flex justify-between items-center">
-                    <span className="text-3xl font-bold text-amber-300">
+                  <h3 className="text-xl font-bold text-amber-300">{special.name}</h3>
+                  <p className="text-gray-300 text-sm">{special.description}</p>
+                  <div className="mt-2">
+                    <span className="text-2xl font-bold text-amber-300">
                       ${special.price.toFixed(2)}
                     </span>
                   </div>
@@ -168,9 +181,9 @@ const DigitalMenuBoard: React.FC<DigitalMenuBoardProps> = ({ view = 'menu' }) =>
   };
 
   // Render just the combos view
-  const renderCombosView = () => {
-    // Get combo items
-    const comboItems = SAMPLE_MENU_ITEMS.filter(item => item.category === 'combos');
+  const renderCombosView = (): JSX.Element => {
+    // Get all combo items
+    const comboItems = menuItems.filter(item => item.category === 'combos');
     
     return (
       <>
@@ -179,7 +192,7 @@ const DigitalMenuBoard: React.FC<DigitalMenuBoardProps> = ({ view = 'menu' }) =>
           <p className="text-amber-300 text-xl text-center mb-6">Mix & Match Your Favorites</p>
           
           <div className="space-y-6">
-            {comboItems.map(combo => (
+            {comboItems.map((combo: MenuItem) => (
               <div key={combo.id} className="bg-black bg-opacity-50 p-4 rounded-lg">
                 <div className="flex justify-between items-start">
                   <div>
@@ -216,7 +229,7 @@ const DigitalMenuBoard: React.FC<DigitalMenuBoardProps> = ({ view = 'menu' }) =>
   };
 
   // Render different content based on the selected view
-  const renderContent = () => {
+  const renderContent = (): JSX.Element => {
     switch(view) {
       case 'specials':
         return renderSpecialsView();

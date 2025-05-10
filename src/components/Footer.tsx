@@ -35,6 +35,12 @@ const Footer: React.FC = () => {
                   Digital Menu Board
                 </a>
               </li>
+              <li className="flex items-center mt-2">
+                <span className="mr-2">⚙️</span>
+                <a href="/admin" className="hover:text-amber-300 transition-colors">
+                  Staff Portal
+                </a>
+              </li>
             </ul>
           </div>
           

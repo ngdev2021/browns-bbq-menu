@@ -12,7 +12,7 @@ import Confetti from '../components/Confetti';
 import Footer from '../components/Footer';
 import { useCart } from '../contexts/CartContext';
 import { checkHolidays } from '../lib/timeUtils';
-import { SAMPLE_MENU_ITEMS } from '../data/sampleData';
+import { getMenuItems, getBusinessSettings, MenuItem } from '../lib/menuService';
 
 interface CartItem {
   id: string;
@@ -24,7 +24,14 @@ interface CartItem {
 
 export default function Home() {
   // State for menu data
-  const [menuItems] = useState(SAMPLE_MENU_ITEMS);
+  const [menuItems, setMenuItems] = useState<MenuItem[]>(getMenuItems());
+  const [businessSettings, setBusinessSettings] = useState(getBusinessSettings());
+  
+  // Load menu data when component mounts
+  useEffect(() => {
+    setMenuItems(getMenuItems());
+    setBusinessSettings(getBusinessSettings());
+  }, []);
   
   // State for menu filtering
   const [selectedCategory, setSelectedCategory] = useState('all');
