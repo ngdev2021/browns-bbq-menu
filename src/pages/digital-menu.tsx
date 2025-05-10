@@ -69,7 +69,7 @@ const DigitalMenuPage: React.FC = () => {
       >
         {/* Digital Menu Display */}
         <div className={`${isFullscreen ? 'w-full h-full' : 'w-full max-w-6xl'}`}>
-          <DigitalMenuBoard />
+          <DigitalMenuBoard view={currentView as 'menu' | 'specials' | 'combos'} />
           
           {/* Staff Controls - Hidden in fullscreen mode unless toggled */}
           {showControls && (
