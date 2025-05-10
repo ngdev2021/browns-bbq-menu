@@ -153,12 +153,20 @@ export default function Home() {
           <div className="container h-full flex flex-col justify-center items-center text-center">
             <h1 className="text-5xl md:text-6xl font-bold mb-4">Brown's Bar-B-Cue</h1>
             <p className="text-xl md:text-2xl mb-8 max-w-2xl">Authentic BBQ plates, sandwiches, and combo meals.</p>
-            <button 
-              onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}
-              className="px-8 py-3 bg-amber-700 hover:bg-amber-600 rounded-lg font-bold text-lg transition-colors"
-            >
-              View Menu
-            </button>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <button 
+                onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}
+                className="px-8 py-3 bg-amber-700 hover:bg-amber-600 rounded-lg font-bold text-lg transition-colors"
+              >
+                View Menu
+              </button>
+              <a 
+                href="/digital-menu" 
+                className="px-8 py-3 bg-red-800 hover:bg-red-700 rounded-lg font-bold text-lg transition-colors flex items-center justify-center"
+              >
+                <span className="mr-2">📺</span> Digital Menu Board
+              </a>
+            </div>
           </div>
         </HeroBackground>
         

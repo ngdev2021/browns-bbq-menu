@@ -29,6 +29,12 @@ const Footer: React.FC = () => {
                 <span className="mr-2">💳</span>
                 <span>CashApp: $brownroscoe</span>
               </li>
+              <li className="flex items-center mt-4 pt-2 border-t border-gray-700">
+                <span className="mr-2">📺</span>
+                <a href="/digital-menu" className="hover:text-amber-300 transition-colors">
+                  Digital Menu Board
+                </a>
+              </li>
             </ul>
           </div>
           
