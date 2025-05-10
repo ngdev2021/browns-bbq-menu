@@ -167,9 +167,10 @@ const DigitalMenuBoard: React.FC = () => {
         </div>
         <p className="text-amber-300 text-lg">All plates come with your choice of two sides (5 oz. serving)</p>
         <p className="text-amber-300 text-lg">Beans • Potato Salad • Dirty Rice</p>
-        <div className="mt-3 flex justify-center space-x-6">
-          <p className="text-white">📱 Order Online: brownsbbq.com</p>
-          <p className="text-white">☎️ Call: (555) 123-4567</p>
+        <div className="mt-3 flex flex-wrap justify-center gap-4">
+          <p className="text-white">📱 Website: brownsbarbcue.com</p>
+          <p className="text-white">☎️ Call: (682) 352-8545</p>
+          <p className="text-white">💳 CashApp: $brownroscoe</p>
         </div>
         <p className="text-sm mt-2 text-gray-400">*Prices subject to change without notice</p>
       </div>

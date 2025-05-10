@@ -9,6 +9,7 @@ import CartDrawer from '../components/CartDrawer';
 import Toast from '../components/Toast';
 import NetworkStatus from '../components/NetworkStatus';
 import Confetti from '../components/Confetti';
+import Footer from '../components/Footer';
 import { useCart } from '../contexts/CartContext';
 import { checkHolidays } from '../lib/timeUtils';
 import { SAMPLE_MENU_ITEMS } from '../data/sampleData';
@@ -219,6 +220,9 @@ export default function Home() {
           visible={toast.visible}
           onClose={() => setToast(prev => ({ ...prev, visible: false }))}
         />
+        
+        {/* Footer */}
+        <Footer />
       </main>
     </>
   );
