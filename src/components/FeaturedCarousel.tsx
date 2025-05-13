@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getCacheBustedImageUrl, getMenuItemImagePath } from '../lib/imageUtils';
 
 interface FeaturedItem {
   id: string;
@@ -15,6 +16,8 @@ interface FeaturedCarouselProps {
 
 const FeaturedCarousel: React.FC<FeaturedCarouselProps> = ({ items }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [imageUrls, setImageUrls] = useState<Record<string, string>>({});
+  const [imagesLoaded, setImagesLoaded] = useState<Record<string, boolean>>({});
   
   // Animation variants
   const variants = {
@@ -23,6 +26,58 @@ const FeaturedCarousel: React.FC<FeaturedCarouselProps> = ({ items }) => {
     exit: { opacity: 0, scale: 1.1 }
   };
 
+  // Process image URLs with cache-busting and preload images
+  useEffect(() => {
+    if (items.length === 0) return;
+    
+    const newImageUrls: Record<string, string> = {};
+    const loadImage = (item: FeaturedItem) => {
+      try {
+        // Get the correct image path and add cache busting
+        const mappedImagePath = getMenuItemImagePath(item.image_url);
+        const fullImageUrl = getCacheBustedImageUrl(mappedImagePath);
+        
+        // Preload the image
+        const img = new Image();
+        img.onload = () => {
+          // Update the loaded state for this image
+          setImagesLoaded(prev => ({
+            ...prev,
+            [item.id]: true
+          }));
+        };
+        img.onerror = () => {
+          console.error(`Failed to preload image for featured item: ${item.name}`);
+          // Fall back to placeholder
+          newImageUrls[item.id] = '/images/placeholder-food.jpg';
+          setImageUrls({...newImageUrls});
+          // Mark as loaded even though it's a fallback
+          setImagesLoaded(prev => ({
+            ...prev,
+            [item.id]: true
+          }));
+        };
+        
+        // Set the URL and start loading
+        newImageUrls[item.id] = fullImageUrl;
+        img.src = fullImageUrl;
+      } catch (error) {
+        console.error(`Error loading image for featured item: ${item.name}`, error);
+        newImageUrls[item.id] = '/images/placeholder-food.jpg';
+        setImagesLoaded(prev => ({
+          ...prev,
+          [item.id]: true
+        }));
+      }
+    };
+    
+    // Process each item
+    items.forEach(loadImage);
+    
+    // Update the URLs state
+    setImageUrls(newImageUrls);
+  }, [items]);
+  
   // Auto-rotate carousel
   useEffect(() => {
     if (items.length <= 1) return;
@@ -61,11 +116,35 @@ const FeaturedCarousel: React.FC<FeaturedCarouselProps> = ({ items }) => {
             <div className="relative h-full w-full">
               {/* Image */}
               <div className="relative h-full w-full overflow-hidden">
+                {!imagesLoaded[currentItem.id] && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-charcoal-700 z-10">
+                    <div className="w-12 h-12 border-4 border-t-teal-500 border-charcoal-600 rounded-full animate-spin"></div>
+                  </div>
+                )}
                 <img 
-                  src={currentItem.image_url}
+                  src={imageUrls[currentItem.id] || '/images/placeholder-food.jpg'}
                   alt={currentItem.name}
-                  className="w-full h-full object-cover"
+                  className={`w-full h-full object-cover transition-opacity duration-500 ${imagesLoaded[currentItem.id] ? 'opacity-100' : 'opacity-0'}`}
                   loading="eager"
+                  onLoad={() => {
+                    setImagesLoaded(prev => ({
+                      ...prev,
+                      [currentItem.id]: true
+                    }));
+                  }}
+                  onError={() => {
+                    console.error(`Failed to load featured carousel image for: ${currentItem.name}`);
+                    // Fall back to placeholder if image fails to load
+                    setImageUrls(prev => ({
+                      ...prev,
+                      [currentItem.id]: '/images/placeholder-food.jpg'
+                    }));
+                    // Mark as loaded even though it's a fallback
+                    setImagesLoaded(prev => ({
+                      ...prev,
+                      [currentItem.id]: true
+                    }));
+                  }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-charcoal-900/80 to-transparent" />
               </div>

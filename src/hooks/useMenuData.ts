@@ -1,17 +1,9 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
+import { RealtimePostgresChangesPayload } from '@supabase/supabase-js';
+import { MenuItem } from '../lib/menuService';
 
-interface MenuItem {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  category: string;
-  image_url: string;
-  tags: string[];
-  stock: number;
-  featured: boolean;
-}
+// Using MenuItem from menuService
 
 export function useMenuData() {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
@@ -45,44 +37,63 @@ export function useMenuData() {
     fetchMenu();
 
     // Set up real-time subscription
-    const subscription = supabase
-      .channel('menu_changes')
-      .on('postgres_changes', 
-        { event: 'UPDATE', schema: 'public', table: 'menu_items' }, 
-        (payload) => {
-          console.log('Menu item updated:', payload);
-          // Update the specific item in the state
+    const channel = supabase.channel('menu_changes');
+    
+    // Handle UPDATE events
+    channel.on(
+      'postgres_changes',
+      { event: 'UPDATE', schema: 'public', table: 'menu_items' },
+      (payload: RealtimePostgresChangesPayload<Record<string, any>>) => {
+        console.log('Menu item updated:', payload);
+        // Update the specific item in the state
+        if (payload.new && 'id' in payload.new) {
+          const newItem = payload.new as Record<string, any>;
           setMenuItems(currentItems => {
             return currentItems.map(item => {
-              if (item.id === payload.new.id) {
-                return { ...item, ...payload.new };
+              if (item.id === newItem.id) {
+                return { ...item, ...newItem } as MenuItem;
               }
               return item;
             });
           });
         }
-      )
-      .on('postgres_changes', 
-        { event: 'INSERT', schema: 'public', table: 'menu_items' }, 
-        (payload) => {
-          console.log('Menu item added:', payload);
+      }
+    );
+    
+    // Handle INSERT events
+    channel.on(
+      'postgres_changes',
+      { event: 'INSERT', schema: 'public', table: 'menu_items' },
+      (payload: RealtimePostgresChangesPayload<Record<string, any>>) => {
+        console.log('Menu item added:', payload);
+        if (payload.new) {
           setMenuItems(currentItems => [...currentItems, payload.new as MenuItem]);
         }
-      )
-      .on('postgres_changes', 
-        { event: 'DELETE', schema: 'public', table: 'menu_items' }, 
-        (payload) => {
-          console.log('Menu item deleted:', payload);
+      }
+    );
+    
+    // Handle DELETE events
+    channel.on(
+      'postgres_changes',
+      { event: 'DELETE', schema: 'public', table: 'menu_items' },
+      (payload: RealtimePostgresChangesPayload<Record<string, any>>) => {
+        console.log('Menu item deleted:', payload);
+        if (payload.old && 'id' in payload.old) {
+          const oldItem = payload.old as Record<string, any>;
           setMenuItems(currentItems => 
-            currentItems.filter(item => item.id !== payload.old.id)
+            currentItems.filter(item => item.id !== oldItem.id)
           );
         }
-      )
-      .subscribe();
+      }
+    );
+    
+    // Subscribe to the channel
+    const subscription = channel.subscribe();
 
     // Cleanup subscription on unmount
     return () => {
-      subscription.unsubscribe();
+      // Use type assertion to bypass TypeScript errors
+      (supabase as any).removeChannel(channel);
     };
   }, []);
 

@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import ReviewSection from './ReviewSection';
+import { getCacheBustedImageUrl, getMenuItemImagePath } from '../lib/imageUtils';
 
 interface MenuItem {
   id: string;
@@ -42,6 +43,38 @@ const MenuItemDetails: React.FC<MenuItemDetailsProps> = ({
   onClose,
   onAddToCart
 }) => {
+  const [imageSrc, setImageSrc] = useState('/images/placeholder-food.jpg');
+  const [imageLoaded, setImageLoaded] = useState(false);
+  
+  // Handle image loading with cache-busting
+  useEffect(() => {
+    if (typeof window !== 'undefined' && isOpen) {
+      try {
+        // Get the correct image path and add cache busting
+        const mappedImagePath = getMenuItemImagePath(item.image_url);
+        const fullImageUrl = getCacheBustedImageUrl(mappedImagePath);
+        
+        // Preload the image to ensure it's available
+        const img = new Image();
+        img.onload = () => {
+          setImageSrc(fullImageUrl);
+          setImageLoaded(true);
+        };
+        img.onerror = () => {
+          console.error(`Failed to preload image in details view: ${fullImageUrl}`);
+          // Fall back to placeholder
+          setImageSrc('/images/placeholder-food.jpg');
+          setImageLoaded(true);
+        };
+        img.src = fullImageUrl;
+      } catch (error) {
+        console.error('Error loading image in details view:', error);
+        setImageSrc('/images/placeholder-food.jpg');
+        setImageLoaded(true);
+      }
+    }
+  }, [item.image_url, isOpen]);
+  
   if (!isOpen) return null;
 
   // Map of dietary tags to display names
@@ -86,11 +119,23 @@ const MenuItemDetails: React.FC<MenuItemDetailsProps> = ({
         
         {/* Image */}
         <div className="relative h-64 overflow-hidden">
+          {!imageLoaded && (
+            <div className="absolute inset-0 flex items-center justify-center bg-charcoal-700 z-10">
+              <div className="w-10 h-10 border-4 border-t-teal-500 border-charcoal-600 rounded-full animate-spin"></div>
+            </div>
+          )}
           <img
-            src={item.image_url}
+            src={imageSrc}
             alt={item.name}
-            className="w-full h-full object-cover"
+            className={`w-full h-full object-cover transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
             loading="eager"
+            onLoad={() => setImageLoaded(true)}
+            onError={(e) => {
+              console.error(`Failed to load image in details view: ${imageSrc}`);
+              // Fall back to placeholder if image fails to load
+              setImageSrc('/images/placeholder-food.jpg');
+              setImageLoaded(true);
+            }}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-charcoal-900 to-transparent" />
         </div>

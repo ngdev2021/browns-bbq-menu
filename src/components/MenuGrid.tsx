@@ -1,24 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import MenuItemCard from './MenuItemCard';
+import { MenuItem } from '../lib/menuService';
 
-interface MenuItem {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  category: string;
-  image_url: string;
-  tags: string[];
-  stock: number;
-  featured: boolean;
-}
+// Using MenuItem from menuService
 
 interface MenuGridProps {
   items: MenuItem[];
   category?: string;
   searchQuery?: string;
   activeFilters?: string[];
-  onAddToCart: (item: MenuItem) => void;
+  onAddToCart: (item: MenuItem, selectedOptions?: any[], specialInstructions?: string) => void;
 }
 
 const MenuGrid: React.FC<MenuGridProps> = ({ 
@@ -32,42 +23,52 @@ const MenuGrid: React.FC<MenuGridProps> = ({
 
   // Filter items based on category, search query, and active filters
   useEffect(() => {
-    let result = [...items];
-    
-    // Filter by category
-    if (category && category !== 'all') {
-      result = result.filter(item => item.category === category);
-    }
-    
-    // Filter by search query
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      result = result.filter(item => {
-        return (
-          item.name.toLowerCase().includes(query) ||
-          item.description.toLowerCase().includes(query) ||
-          item.tags.some(tag => tag.toLowerCase().includes(query))
-        );
-      });
-    }
-    
-    // Filter by dietary preferences
-    if (activeFilters.length > 0) {
-      result = result.filter(item => {
-        // Check if item has all the active filters
-        return activeFilters.every(filter => {
-          // Special case for price filter
-          if (filter === 'under-10') {
-            return item.price < 10;
-          }
-          // For other filters, check if the tag exists
-          return item.tags.includes(filter);
+    // Create a stable reference to the items array to prevent infinite loops
+    const filterItems = () => {
+      let result = [...items];
+      
+      // Filter by category
+      if (category && category !== 'all') {
+        result = result.filter(item => item.category === category);
+      }
+      
+      // Filter by search query
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        result = result.filter(item => {
+          return (
+            item.name.toLowerCase().includes(query) ||
+            item.description.toLowerCase().includes(query) ||
+            item.tags.some(tag => tag.toLowerCase().includes(query))
+          );
         });
-      });
-    }
+      }
+      
+      // Filter by dietary preferences
+      if (activeFilters.length > 0) {
+        result = result.filter(item => {
+          // Check if item has all the active filters
+          return activeFilters.every(filter => {
+            // Special case for price filter
+            if (filter === 'under-10') {
+              return item.price < 10;
+            }
+            // For other filters, check if the tag exists
+            return item.tags.includes(filter);
+          });
+        });
+      }
+      
+      return result;
+    };
     
-    setFilteredItems(result);
-  }, [items, category, searchQuery, activeFilters]);
+    // Update filtered items
+    setFilteredItems(filterItems());
+    
+    // This effect should only run when the dependencies actually change
+    // Using JSON.stringify to create a stable reference for comparison
+  }, [JSON.stringify(items), category, searchQuery, JSON.stringify(activeFilters)]);
+  
 
   if (filteredItems.length === 0) {
     return (
@@ -87,7 +88,10 @@ const MenuGrid: React.FC<MenuGridProps> = ({
         <MenuItemCard 
           key={item.id} 
           item={item} 
-          onAddToCart={() => onAddToCart(item)} 
+          menuItems={items}
+          onAddToCart={(item, selectedOptions, specialInstructions) => 
+            onAddToCart(item, selectedOptions, specialInstructions)
+          } 
         />
       ))}
     </div>

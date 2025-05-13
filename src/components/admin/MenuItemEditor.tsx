@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 
 interface MenuItemEditorProps {
   item: any;
@@ -11,6 +11,9 @@ const MenuItemEditor: React.FC<MenuItemEditorProps> = ({ item, onSave, onCancel,
   const [formData, setFormData] = useState({ ...item });
   const [newTag, setNewTag] = useState('');
   const [newIngredient, setNewIngredient] = useState('');
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -74,6 +77,68 @@ const MenuItemEditor: React.FC<MenuItemEditorProps> = ({ item, onSave, onCancel,
       ...formData,
       ingredients: formData.ingredients.filter((i: string) => i !== ingredient)
     });
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      alert('Please upload a valid image file (JPEG, PNG, GIF, WEBP)');
+      return;
+    }
+
+    // Validate file size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('File size must be less than 5MB');
+      return;
+    }
+
+    setIsUploading(true);
+    setUploadProgress(10); // Start progress
+
+    const formDataObj = new FormData();
+    formDataObj.append('image', file);
+
+    try {
+      // Set initial progress
+      setUploadProgress(20);
+      
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formDataObj,
+      });
+
+      // Update progress after server responds
+      setUploadProgress(80);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Upload failed');
+      }
+
+      const data = await response.json();
+      setUploadProgress(100);
+      
+      // Update the form data with the new image URL
+      setFormData((prevData: any) => ({
+        ...prevData,
+        image_url: data.url
+      }));
+
+      // Reset after a short delay
+      setTimeout(() => {
+        setIsUploading(false);
+        setUploadProgress(0);
+      }, 1000);
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      alert('Failed to upload image. Please try again.');
+      setIsUploading(false);
+      setUploadProgress(0);
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -160,17 +225,68 @@ const MenuItemEditor: React.FC<MenuItemEditorProps> = ({ item, onSave, onCancel,
             </div>
             
             <div className="md:col-span-2">
-              <label className="block text-gray-300 mb-1">Image URL</label>
-              <input
-                type="text"
-                name="image_url"
-                value={formData.image_url}
-                onChange={handleChange}
-                className="w-full bg-gray-700 border border-gray-600 rounded p-2 text-white"
-              />
+              <label className="block text-gray-300 mb-1">Image</label>
+              <div className="space-y-4">
+                {/* URL Input */}
+                <div>
+                  <label className="block text-gray-400 text-sm mb-1">Enter Image URL</label>
+                  <input
+                    type="text"
+                    name="image_url"
+                    value={formData.image_url || ''}
+                    onChange={handleChange}
+                    placeholder="https://example.com/image.jpg"
+                    className="w-full bg-gray-700 border border-gray-600 rounded p-2 text-white"
+                  />
+                </div>
+                
+                {/* OR Divider */}
+                <div className="flex items-center">
+                  <div className="flex-grow border-t border-gray-600"></div>
+                  <span className="mx-4 text-gray-400">OR</span>
+                  <div className="flex-grow border-t border-gray-600"></div>
+                </div>
+                
+                {/* File Upload */}
+                <div>
+                  <label className="block text-gray-400 text-sm mb-1">Upload Image</label>
+                  <div className="flex items-center">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileUpload}
+                      className="hidden"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="px-4 py-2 bg-amber-600 hover:bg-amber-700 rounded text-white mr-2 flex-shrink-0"
+                      disabled={isUploading}
+                    >
+                      {isUploading ? 'Uploading...' : 'Choose File'}
+                    </button>
+                    <span className="text-gray-400 text-sm">
+                      {isUploading ? `${uploadProgress}%` : 'Max 5MB (JPEG, PNG, GIF, WEBP)'}
+                    </span>
+                  </div>
+                  
+                  {/* Upload Progress Bar */}
+                  {isUploading && (
+                    <div className="w-full bg-gray-700 rounded-full h-2.5 mt-2">
+                      <div 
+                        className="bg-amber-600 h-2.5 rounded-full" 
+                        style={{ width: `${uploadProgress}%` }}
+                      ></div>
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              {/* Image Preview */}
               {formData.image_url && (
-                <div className="mt-2 flex items-center">
-                  <div className="w-12 h-12 rounded overflow-hidden bg-gray-600 mr-2">
+                <div className="mt-4 flex items-start">
+                  <div className="w-24 h-24 rounded overflow-hidden bg-gray-600 mr-3">
                     <img 
                       src={formData.image_url} 
                       alt="Preview" 
@@ -180,7 +296,10 @@ const MenuItemEditor: React.FC<MenuItemEditorProps> = ({ item, onSave, onCancel,
                       }}
                     />
                   </div>
-                  <span className="text-xs text-gray-400">Image Preview</span>
+                  <div className="flex flex-col">
+                    <span className="text-gray-300 font-medium">Image Preview</span>
+                    <span className="text-gray-400 text-sm break-all">{formData.image_url}</span>
+                  </div>
                 </div>
               )}
             </div>

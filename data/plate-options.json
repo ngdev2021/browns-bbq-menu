@@ -1,0 +1,57 @@
+[
+  {
+    "id": "plate-1",
+    "name": "1-Meat Plate",
+    "description": "Your choice of 1 meat served with two sides.",
+    "price": 14.99,
+    "category": "plates",
+    "image_url": "/images/menu-items/brisket-plate.jpg",
+    "tags": ["bbq", "meat", "plate"],
+    "stock": 100,
+    "featured": false
+  },
+  {
+    "id": "plate-2",
+    "name": "2-Meat Plate",
+    "description": "Your choice of 2 meats served with two sides.",
+    "price": 18.99,
+    "category": "plates",
+    "image_url": "/images/menu-items/ribs-plate.jpg",
+    "tags": ["bbq", "meat", "plate"],
+    "stock": 100,
+    "featured": true
+  },
+  {
+    "id": "plate-3",
+    "name": "3-Meat Plate",
+    "description": "Your choice of 3 meats served with two sides.",
+    "price": 22.99,
+    "category": "plates",
+    "image_url": "/images/menu-items/combo-plate.jpg",
+    "tags": ["bbq", "meat", "plate"],
+    "stock": 100,
+    "featured": false
+  },
+  {
+    "id": "plate-4",
+    "name": "4-Meat Plate",
+    "description": "Your choice of 4 meats served with two sides.",
+    "price": 26.99,
+    "category": "plates",
+    "image_url": "/images/menu-items/combo-plate.jpg",
+    "tags": ["bbq", "meat", "plate"],
+    "stock": 100,
+    "featured": false
+  },
+  {
+    "id": "plate-5",
+    "name": "5-Meat Plate",
+    "description": "Your choice of 5 meats served with two sides. The ultimate BBQ experience!",
+    "price": 29.99,
+    "category": "plates",
+    "image_url": "/images/menu-items/combo-plate.jpg",
+    "tags": ["bbq", "meat", "plate"],
+    "stock": 100,
+    "featured": false
+  }
+]

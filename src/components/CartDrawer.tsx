@@ -1,5 +1,15 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
+import { getMenuItemImagePath, getCacheBustedImageUrl } from '../lib/imageUtils';
+import EditCartItemModal from './EditCartItemModal';
+
+interface CartItemOption {
+  group_id: string;
+  group_name: string;
+  option_id: string;
+  option_name: string;
+  price: number;
+}
 
 interface CartItem {
   id: string;
@@ -7,6 +17,27 @@ interface CartItem {
   price: number;
   quantity: number;
   image_url: string;
+  options?: CartItemOption[];
+  special_instructions?: string;
+  isCombo?: boolean;
+  combo_items?: any[];
+  isMultiMeatPlate?: boolean;
+  secondMeat?: {
+    id: string;
+    name: string;
+    price: number;
+  } | null;
+  selectedSides?: {
+    id: string;
+    name: string;
+    price: number;
+  }[];
+  selectedDessert?: {
+    id: string;
+    name: string;
+    price: number;
+  } | null;
+  bundleAccepted?: boolean;
 }
 
 interface CartDrawerProps {
@@ -14,6 +45,7 @@ interface CartDrawerProps {
   onClose: () => void;
   items: CartItem[];
   onUpdateQuantity: (id: string, quantity: number) => void;
+  onEditItem: (id: string, updates: Partial<CartItem>) => void;
   onCheckout: () => void;
 }
 
@@ -22,8 +54,24 @@ const CartDrawer: React.FC<CartDrawerProps> = ({
   onClose,
   items,
   onUpdateQuantity,
+  onEditItem,
   onCheckout
 }) => {
+  // State for the edit modal
+  const [editingItem, setEditingItem] = useState<CartItem | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  
+  // Open edit modal for an item
+  const handleEditItem = (item: CartItem) => {
+    setEditingItem(item);
+    setIsEditModalOpen(true);
+  };
+  
+  // Close edit modal
+  const handleCloseEditModal = () => {
+    setIsEditModalOpen(false);
+    setEditingItem(null);
+  };
   // Ref for close button to manage focus
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   
@@ -128,9 +176,13 @@ const CartDrawer: React.FC<CartDrawerProps> = ({
                   {/* Item image */}
                   <div className="w-16 h-16 rounded-md bg-charcoal-700 overflow-hidden relative flex-shrink-0">
                     <img 
-                      src={item.image_url} 
+                      src={getCacheBustedImageUrl(getMenuItemImagePath(item.image_url))} 
                       alt={item.name}
                       className="w-full h-full object-cover"
+                      onError={(e) => {
+                        // Fall back to placeholder if image fails to load
+                        (e.target as HTMLImageElement).src = '/images/placeholder-food.jpg';
+                      }}
                     />
                   </div>
                   
@@ -138,9 +190,101 @@ const CartDrawer: React.FC<CartDrawerProps> = ({
                   <div className="flex-1">
                     <h3 className="font-medium">{item.name}</h3>
                     <p className="text-teal-400">${item.price.toFixed(2)}</p>
+                    
+                    {/* Show options if any */}
+                    {item.options && item.options.length > 0 && (
+                      <div className="mt-1 text-xs text-gray-400">
+                        {item.options.map((option) => (
+                          <div key={option.option_id}>
+                            {option.option_name}
+                            {option.price > 0 && ` (+$${option.price.toFixed(2)})`}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    
+                    {/* Show second meat for multi-meat plates */}
+                    {item.isMultiMeatPlate && item.secondMeat && (
+                      <div className="mt-1 text-xs text-gray-400">
+                        <div className="font-medium text-gray-300 flex items-center">
+                          <span className="bg-amber-700 text-white text-xs px-1 rounded mr-1">2-MEAT</span> 
+                          With {item.secondMeat.name}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Show selected sides */}
+                    {item.selectedSides && item.selectedSides.length > 0 && (
+                      <div className="mt-1 text-xs text-gray-400">
+                        <div className="font-medium text-gray-300">Sides:</div>
+                        {item.selectedSides.map((side: {id: string; name: string; price: number}, index: number) => (
+                          <div key={index} className="flex justify-between">
+                            <span>{side.name}</span>
+                            <span className="text-amber-500">Included</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    
+                    {/* Show selected dessert */}
+                    {item.selectedDessert && (
+                      <div className="mt-1 text-xs text-gray-400">
+                        <div className="font-medium text-gray-300">Dessert:</div>
+                        <div className="flex justify-between">
+                          <span>{item.selectedDessert.name}</span>
+                          <span className="text-amber-500">+${item.selectedDessert.price.toFixed(2)}</span>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Show bundle info */}
+                    {item.bundleAccepted && (
+                      <div className="mt-1 text-xs text-gray-400">
+                        <div className="font-medium text-amber-500 flex items-center">
+                          <span className="bg-amber-700 text-white text-xs px-1 rounded mr-1">BUNDLE</span> 
+                          Special Bundle Deal
+                        </div>
+                        {item.bundleItems && (
+                          <div className="ml-2 mt-1">
+                            {item.bundleItems.side && (
+                              <div className="flex justify-between">
+                                <span>• {item.bundleItems.side.name} (Side)</span>
+                              </div>
+                            )}
+                            {item.bundleItems.drink && (
+                              <div className="flex justify-between">
+                                <span>• {item.bundleItems.drink.name} (Drink)</span>
+                              </div>
+                            )}
+                            <div className="text-amber-500 mt-1">
+                              Bundle price: ${item.bundleItems.bundlePrice.toFixed(2)}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    
+                    {/* Show combo items */}
+                    {item.isCombo && item.combo_items && (
+                      <div className="mt-1 text-xs text-gray-400">
+                        <div className="font-medium text-gray-300">Includes:</div>
+                        {item.combo_items.map((comboItem, index) => (
+                          <div key={index}>
+                            {comboItem.item_name}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    
+                    {/* Show special instructions */}
+                    {item.special_instructions && (
+                      <div className="mt-1 text-xs italic text-gray-400">
+                        Note: {item.special_instructions}
+                      </div>
+                    )}
                   </div>
                   
-                  {/* Quantity controls */}
+                  {/* Quantity controls and edit button */}
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => onUpdateQuantity(item.id, item.quantity - 1)}
@@ -162,6 +306,16 @@ const CartDrawer: React.FC<CartDrawerProps> = ({
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                      </svg>
+                    </button>
+                    
+                    <button
+                      onClick={() => handleEditItem(item)}
+                      className="ml-2 w-8 h-8 rounded-full bg-amber-700 flex items-center justify-center hover:bg-amber-600"
+                      aria-label="Edit item"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                       </svg>
                     </button>
                   </div>
@@ -200,6 +354,16 @@ const CartDrawer: React.FC<CartDrawerProps> = ({
           </div>
         )}
       </motion.aside>
+      
+      {/* Edit Item Modal */}
+      {editingItem && (
+        <EditCartItemModal
+          item={editingItem}
+          isOpen={isEditModalOpen}
+          onClose={handleCloseEditModal}
+          onSave={onEditItem}
+        />
+      )}
     </>
   );
 };

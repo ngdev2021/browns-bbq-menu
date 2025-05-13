@@ -1,0 +1,392 @@
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useRouter } from 'next/router';
+import Head from 'next/head';
+import Image from 'next/image';
+import { getMenuItemsSync, MenuItem as MenuServiceItem } from '../../lib/menuService';
+import { useCart } from '../../contexts/CartContext';
+import { getModifiersForMenuItem } from '../../data/menuCustomizationData';
+import { getUpsellRecommendations, getRelatedItems } from '../../lib/upsellEngine';
+import MultiMeatUpgrade from '../../components/MultiMeatUpgrade';
+import SpecialBundleOffer from '../../components/SpecialBundleOffer';
+import Toast from '../../components/Toast';
+import NetworkStatus from '../../components/NetworkStatus';
+
+// Get menu items
+const menuItems = getMenuItemsSync();
+
+// Use MenuItem type from menuService
+interface MenuItem extends MenuServiceItem {
+  images?: string[];
+  nutritionalInfo?: {
+    calories: number;
+    protein: number;
+    carbs: number;
+    fat: number;
+  };
+}
+
+interface Option {
+  id: string;
+  name: string;
+  price: number;
+  description?: string;
+}
+
+interface ModifierGroup {
+  id: string;
+  name: string;
+  required: boolean;
+  min_selections: number;
+  max_selections: number;
+  options: Option[];
+}
+
+interface SelectedOption {
+  group_id: string;
+  group_name: string;
+  option_id: string;
+  option_name: string;
+  price: number;
+}
+
+interface ItemConfiguration {
+  selectedOptions: SelectedOption[];
+  specialInstructions: string;
+  quantity: number;
+  totalPrice: number;
+}
+
+// Define configuration steps
+enum ConfigStep {
+  MEAT_SELECTION = 'meat',
+  SIDES_SELECTION = 'sides',
+  ADDONS = 'addons',
+  SPECIAL_INSTRUCTIONS = 'instructions',
+  REVIEW = 'review'
+}
+
+const ItemConfigurationPage: React.FC = () => {
+  const router = useRouter();
+  const { id } = router.query;
+  
+  // Cart context
+  const { addItem, items: cartItems } = useCart();
+  
+  // State for item and configuration
+  const [item, setItem] = useState<MenuItem | null>(null);
+  const [currentStep, setCurrentStep] = useState<ConfigStep>(ConfigStep.MEAT_SELECTION);
+  const [configuration, setConfiguration] = useState<ItemConfiguration>({
+    selectedOptions: [],
+    specialInstructions: '',
+    quantity: 1,
+    totalPrice: 0
+  });
+  const [modifierGroups, setModifierGroups] = useState<ModifierGroup[]>([]);
+  const [upsellRecommendations, setUpsellRecommendations] = useState<{id: string, items: MenuItem[]}[]>([]);
+  const [relatedItems, setRelatedItems] = useState<MenuItem[]>([]);
+  
+  // Multi-meat upgrade and bundle offer states
+  const [showMultiMeatUpgrade, setShowMultiMeatUpgrade] = useState<boolean>(false);
+  const [showBundleOffer, setShowBundleOffer] = useState<boolean>(false);
+  const [availableMeats, setAvailableMeats] = useState<MenuItem[]>([]);
+  const [secondMeat, setSecondMeat] = useState<MenuItem | null>(null);
+  const [isMultiMeatPlate, setIsMultiMeatPlate] = useState<boolean>(false);
+  const [bundleAccepted, setBundleAccepted] = useState<boolean>(false);
+  
+  // Side selection state
+  const [selectedSides, setSelectedSides] = useState<MenuItem[]>([]);
+  const [maxSides, setMaxSides] = useState<number>(2);
+  
+  // Dessert upsell state
+  const [showDessertUpsell, setShowDessertUpsell] = useState<boolean>(false);
+  const [selectedDessert, setSelectedDessert] = useState<MenuItem | null>(null);
+  
+  // Toast notification
+  const [toast, setToast] = useState({ message: '', visible: false });
+  
+  // Animation variants for page transitions
+  const pageVariants = {
+    initial: { opacity: 0, x: 100 },
+    animate: { opacity: 1, x: 0 },
+    exit: { opacity: 0, x: -100 }
+  };
+  
+  // Load item data
+  useEffect(() => {
+    if (id) {
+      const foundItem = menuItems.find(item => item.id === id) as MenuItem;
+      if (foundItem) {
+        setItem(foundItem);
+        setConfiguration(prev => ({
+          ...prev,
+          totalPrice: foundItem.price
+        }));
+        
+        // Get modifier groups for this item
+        const groups = getModifiersForMenuItem(id as string) as ModifierGroup[];
+        if (groups) {
+          setModifierGroups(groups);
+        }
+        
+        // Get related items
+        const related = getRelatedItems(foundItem, menuItems, 3);
+        setRelatedItems(related);
+        
+        // Get upsell recommendations
+        const recommendations = getUpsellRecommendations([], menuItems, 2);
+        setUpsellRecommendations(recommendations);
+        
+        // Check if this is a meat plate (for multi-meat upgrade)
+        if (foundItem.category === 'plates' && foundItem.name.toLowerCase().includes('plate')) {
+          // Find available meats for second meat option
+          const meatItems = menuItems.filter(item => 
+            item.category === 'plates' && 
+            ['brisket', 'ribs', 'sausage', 'turkey', 'chicken', 'pulled pork'].some(
+              meat => item.name.toLowerCase().includes(meat)
+            )
+          );
+          setAvailableMeats(meatItems);
+          
+          // Show multi-meat upgrade after a short delay
+          setTimeout(() => setShowMultiMeatUpgrade(true), 1000);
+        }
+        
+        // Show bundle offer for certain items (e.g., brisket)
+        const shouldShowBundle = 
+          foundItem.name.toLowerCase().includes('brisket') || 
+          foundItem.name.toLowerCase().includes('ribs');
+        
+        if (shouldShowBundle) {
+          // Show bundle offer after a short delay
+          setTimeout(() => setShowBundleOffer(true), 1500);
+        }
+      }
+    }
+  }, [id]);
+  
+  // Handle multi-meat upgrade selection
+  const handleMultiMeatUpgrade = (selectedMeat: MenuItem) => {
+    setSecondMeat(selectedMeat);
+    setIsMultiMeatPlate(true);
+    setShowMultiMeatUpgrade(false);
+    
+    // Update price (add $4 for the upgrade)
+    setConfiguration(prev => ({
+      ...prev,
+      totalPrice: prev.totalPrice + 4.00
+    }));
+    
+    // Increase max sides to 3 for multi-meat plates
+    setMaxSides(3);
+    
+    // Show toast notification
+    setToast({ 
+      message: `Added ${selectedMeat.name} as your second meat!`, 
+      visible: true 
+    });
+    setTimeout(() => setToast(prev => ({ ...prev, visible: false })), 3000);
+    
+    // Move to sides selection
+    setCurrentStep(ConfigStep.SIDES_SELECTION);
+  };
+  
+  // Handle declining multi-meat upgrade
+  const handleDeclineMultiMeatUpgrade = () => {
+    setShowMultiMeatUpgrade(false);
+    setCurrentStep(ConfigStep.SIDES_SELECTION);
+  };
+  
+  // Handle accepting bundle offer
+  const handleAcceptBundleOffer = () => {
+    setBundleAccepted(true);
+    setShowBundleOffer(false);
+    
+    // Update price (add bundle price)
+    const bundlePrice = 8.99;
+    setConfiguration(prev => ({
+      ...prev,
+      totalPrice: prev.totalPrice + bundlePrice
+    }));
+    
+    // Show toast notification
+    setToast({ 
+      message: "Bundle added to your order!", 
+      visible: true 
+    });
+    setTimeout(() => setToast(prev => ({ ...prev, visible: false })), 3000);
+  };
+  
+  // Handle declining bundle offer
+  const handleDeclineBundleOffer = () => {
+    setShowBundleOffer(false);
+  };
+  
+  // Handle side selection
+  const handleSideSelect = (side: MenuItem) => {
+    // Check if already selected
+    const isAlreadySelected = selectedSides.some(s => s.id === side.id);
+    
+    if (isAlreadySelected) {
+      // Remove from selection
+      setSelectedSides(prev => prev.filter(s => s.id !== side.id));
+    } else if (selectedSides.length < maxSides) {
+      // Add to selection
+      setSelectedSides(prev => [...prev, side]);
+    } else {
+      // Replace the first side with the new one
+      setSelectedSides(prev => [prev[1], side]);
+      
+      // Show toast notification
+      setToast({ 
+        message: `Replaced ${selectedSides[0].name} with ${side.name}`, 
+        visible: true 
+      });
+      setTimeout(() => setToast(prev => ({ ...prev, visible: false })), 3000);
+    }
+  };
+  
+  // Handle dessert selection
+  const handleDessertSelect = (dessert: MenuItem) => {
+    setSelectedDessert(dessert);
+    setShowDessertUpsell(false);
+    
+    // Update price
+    setConfiguration(prev => ({
+      ...prev,
+      totalPrice: prev.totalPrice + dessert.price
+    }));
+    
+    // Show toast notification
+    setToast({ 
+      message: `Added ${dessert.name} to your order!`, 
+      visible: true 
+    });
+    setTimeout(() => setToast(prev => ({ ...prev, visible: false })), 3000);
+    
+    // Move to special instructions
+    setCurrentStep(ConfigStep.SPECIAL_INSTRUCTIONS);
+  };
+  
+  // Handle declining dessert
+  const handleDeclineDessert = () => {
+    setShowDessertUpsell(false);
+    setCurrentStep(ConfigStep.SPECIAL_INSTRUCTIONS);
+  };
+  
+  // Handle special instructions
+  const handleSpecialInstructions = (instructions: string) => {
+    setConfiguration(prev => ({
+      ...prev,
+      specialInstructions: instructions
+    }));
+  };
+  
+  // Handle quantity change
+  const handleQuantityChange = (quantity: number) => {
+    setConfiguration(prev => ({
+      ...prev,
+      quantity
+    }));
+  };
+  
+  // Go to next step
+  const goToNextStep = () => {
+    switch (currentStep) {
+      case ConfigStep.MEAT_SELECTION:
+        setCurrentStep(ConfigStep.SIDES_SELECTION);
+        break;
+      case ConfigStep.SIDES_SELECTION:
+        if (selectedSides.length === maxSides) {
+          setShowDessertUpsell(true);
+        } else {
+          setToast({ 
+            message: `Please select ${maxSides} sides`, 
+            visible: true 
+          });
+          setTimeout(() => setToast(prev => ({ ...prev, visible: false })), 3000);
+        }
+        break;
+      case ConfigStep.ADDONS:
+        setCurrentStep(ConfigStep.SPECIAL_INSTRUCTIONS);
+        break;
+      case ConfigStep.SPECIAL_INSTRUCTIONS:
+        setCurrentStep(ConfigStep.REVIEW);
+        break;
+      case ConfigStep.REVIEW:
+        handleAddToCart();
+        break;
+    }
+  };
+  
+  // Go to previous step
+  const goToPreviousStep = () => {
+    switch (currentStep) {
+      case ConfigStep.SIDES_SELECTION:
+        setCurrentStep(ConfigStep.MEAT_SELECTION);
+        break;
+      case ConfigStep.ADDONS:
+        setCurrentStep(ConfigStep.SIDES_SELECTION);
+        break;
+      case ConfigStep.SPECIAL_INSTRUCTIONS:
+        setCurrentStep(ConfigStep.ADDONS);
+        break;
+      case ConfigStep.REVIEW:
+        setCurrentStep(ConfigStep.SPECIAL_INSTRUCTIONS);
+        break;
+    }
+  };
+  
+  // Add configured item to cart
+  const handleAddToCart = () => {
+    if (!item) return;
+    
+    // Create a complete item with all configurations
+    const configuredItem = {
+      ...item,
+      price: configuration.totalPrice,
+      quantity: configuration.quantity,
+      specialInstructions: configuration.specialInstructions,
+      selectedOptions: configuration.selectedOptions,
+      isMultiMeatPlate,
+      secondMeat: secondMeat ? {
+        id: secondMeat.id,
+        name: secondMeat.name,
+        price: 4.00
+      } : null,
+      selectedSides: selectedSides.map(side => ({
+        id: side.id,
+        name: side.name,
+        price: side.price
+      })),
+      selectedDessert: selectedDessert ? {
+        id: selectedDessert.id,
+        name: selectedDessert.name,
+        price: selectedDessert.price
+      } : null,
+      bundleAccepted
+    };
+    
+    // Add to cart
+    addItem(configuredItem);
+    
+    // Show success toast
+    setToast({ 
+      message: `${item.name} added to cart!`, 
+      visible: true 
+    });
+    setTimeout(() => setToast(prev => ({ ...prev, visible: false })), 3000);
+    
+    // Navigate back to menu
+    router.push('/menu');
+  };
+  
+  // Get sides items
+  const getSides = () => {
+    return menuItems.filter(item => item.category === 'sides');
+  };
+  
+  // Get desserts
+  const getDesserts = () => {
+    return menuItems.filter(item => item.category === 'desserts');
+  };

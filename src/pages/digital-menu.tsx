@@ -60,7 +60,7 @@ const DigitalMenuPage: React.FC = () => {
       <div 
         className={`min-h-screen bg-gray-900 flex items-center justify-center ${isFullscreen ? 'p-0' : 'p-4'}`}
         style={{
-          backgroundImage: 'url("/images/menu-items/brisket-plate.jpg")',
+          backgroundImage: 'url("/images/menu-items/brisket.jpg")',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundBlendMode: 'overlay',

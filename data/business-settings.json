@@ -1,0 +1,9 @@
+{
+  "name": "Brown's Bar-B-Cue",
+  "phone": "(682) 352-8545",
+  "website": "brownsbarbcue.com",
+  "cashApp": "$brownroscoe",
+  "taxRate": 8.25,
+  "enableOnlineOrdering": true,
+  "requirePhoneNumber": true
+}

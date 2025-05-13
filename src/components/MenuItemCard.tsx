@@ -1,22 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import MenuItemDetails from './MenuItemDetails';
+import MenuItemCustomizer from './MenuItemCustomizer';
+import { getCacheBustedImageUrl, getMenuItemImagePath } from '../lib/imageUtils';
+import { getModifiersForMenuItem } from '../data/menuCustomizationData';
+import { getRelatedItems } from '../lib/upsellEngine';
+import { MenuItem } from '../lib/menuService';
 
-interface MenuItem {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  category: string;
-  image_url: string;
-  tags: string[];
-  stock: number;
-  featured: boolean;
-}
+// Using MenuItem from menuService
 
 interface MenuItemCardProps {
   item: MenuItem;
-  onAddToCart: () => void;
+  onAddToCart: (item: any, selectedOptions?: any[], specialInstructions?: string) => void;
+  menuItems: MenuItem[];
 }
 
 // Tag icons mapping
@@ -43,13 +39,57 @@ const tagIcons: Record<string, JSX.Element> = {
   ),
 };
 
-const MenuItemCard: React.FC<MenuItemCardProps> = ({ item, onAddToCart }) => {
+const MenuItemCard: React.FC<MenuItemCardProps> = ({ item, onAddToCart, menuItems }) => {
   const [isAdding, setIsAdding] = useState(false);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [isCustomizerOpen, setIsCustomizerOpen] = useState(false);
+  const [imageSrc, setImageSrc] = useState('/images/placeholder-food.jpg');
+  const [imageLoaded, setImageLoaded] = useState(false);
+  
+  // Get modifiers for this item and filter out null values
+  const modifiers = (getModifiersForMenuItem(item.id) || []).filter(Boolean) as any[];
+  
+  // Get related items for upselling
+  const relatedItems = getRelatedItems(item, menuItems, 3);
+  
+  // Handle image loading with cache-busting
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        // Get the correct image path and add cache busting
+        const mappedImagePath = getMenuItemImagePath(item.image_url);
+        const fullImageUrl = getCacheBustedImageUrl(mappedImagePath);
+        
+        // Preload the image to ensure it's available
+        const img = new Image();
+        img.onload = () => {
+          setImageSrc(fullImageUrl);
+          setImageLoaded(true);
+        };
+        img.onerror = () => {
+          console.error(`Failed to preload image: ${fullImageUrl}`);
+          // Fall back to placeholder
+          setImageSrc('/images/placeholder-food.jpg');
+          setImageLoaded(true);
+        };
+        img.src = fullImageUrl;
+      } catch (error) {
+        console.error('Error loading image:', error);
+        setImageSrc('/images/placeholder-food.jpg');
+        setImageLoaded(true);
+      }
+    }
+  }, [item.image_url]);
   
   // Handle add to cart with animation
-  const handleAddToCart = () => {
+  const handleAddToCart = (customizedItem?: any, selectedOptions?: any[], specialInstructions?: string) => {
     if (item.stock === 0) return;
+    
+    // If we have modifiers and the customizer isn't open, open it instead of adding directly
+    if (modifiers.length > 0 && !isCustomizerOpen && !customizedItem) {
+      setIsCustomizerOpen(true);
+      return;
+    }
     
     setIsAdding(true);
     
@@ -78,24 +118,34 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({ item, onAddToCart }) => {
         const elapsed = currentTime - startTime;
         const progress = Math.min(elapsed / duration, 1);
         
-        // Bezier curve animation
-        const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+        // Bezier curve animation for a natural arc
+        const easeOutCubic = (progress: number): number => 1 - Math.pow(1 - progress, 3);
+        const easeInOutQuad = (progress: number): number => progress < 0.5 ? 2 * progress * progress : 1 - Math.pow(-2 * progress + 2, 2) / 2;
         
-        // Calculate position
-        const currentX = buttonRect.left + (cartRect.left - buttonRect.left) * easeOutQuart;
-        const currentY = buttonRect.top - 50 * Math.sin(progress * Math.PI) + (cartRect.top - buttonRect.top) * easeOutQuart;
+        const x = buttonRect.left + (cartRect.left - buttonRect.left + cartRect.width / 2 - buttonRect.width / 2) * easeOutCubic(progress);
+        const y = buttonRect.top + (cartRect.top - buttonRect.top) * easeInOutQuad(progress) - Math.sin(progress * Math.PI) * 100;
         
-        // Update position
-        flyingItem.style.transform = `translate(-50%, -50%) scale(${1 - progress * 0.5})`;
-        flyingItem.style.top = `${currentY}px`;
-        flyingItem.style.left = `${currentX}px`;
+        // Apply position
+        flyingItem.style.top = `${y}px`;
+        flyingItem.style.left = `${x}px`;
+        
+        // Scale down as it approaches the cart
+        const scale = 1 - easeOutCubic(progress) * 0.5;
+        flyingItem.style.transform = `scale(${scale})`;
         
         if (progress < 1) {
           requestAnimationFrame(animate);
         } else {
           // Animation complete
           document.body.removeChild(flyingItem);
-          onAddToCart();
+          
+          // If we have a customized item, use that
+          if (customizedItem) {
+            onAddToCart(customizedItem, selectedOptions, specialInstructions);
+          } else {
+            onAddToCart(item);
+          }
+          
           setIsAdding(false);
         }
       };
@@ -104,7 +154,11 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({ item, onAddToCart }) => {
     } else {
       // Fallback if elements not found
       setTimeout(() => {
-        onAddToCart();
+        if (customizedItem) {
+          onAddToCart(customizedItem, selectedOptions, specialInstructions);
+        } else {
+          onAddToCart(item);
+        }
         setIsAdding(false);
       }, 500);
     }
@@ -119,6 +173,17 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({ item, onAddToCart }) => {
         onClose={() => setIsDetailsOpen(false)}
         onAddToCart={handleAddToCart}
       />
+      
+      {/* Customizer Modal */}
+      {isCustomizerOpen && modifiers.length > 0 && (
+        <MenuItemCustomizer
+          item={item}
+          modifierGroups={modifiers}
+          onClose={() => setIsCustomizerOpen(false)}
+          onAddToCart={handleAddToCart}
+          recommendedItems={relatedItems}
+        />
+      )}
       
       <div 
         className="bg-charcoal-800 rounded-lg overflow-hidden shadow-lg relative cursor-pointer"
@@ -150,11 +215,22 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({ item, onAddToCart }) => {
         
         {/* Image */}
         <div className="relative h-48 overflow-hidden">
+          {!imageLoaded && (
+            <div className="absolute inset-0 flex items-center justify-center bg-charcoal-700">
+              <div className="w-8 h-8 border-4 border-t-teal-500 border-charcoal-600 rounded-full animate-spin"></div>
+            </div>
+          )}
           <img 
-            src={item.image_url} 
+            src={imageSrc} 
             alt={item.name}
-            className="w-full h-full object-cover"
+            className={`w-full h-full object-cover transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
             loading="lazy"
+            onLoad={() => setImageLoaded(true)}
+            onError={(e) => {
+              console.error(`Failed to load image: ${imageSrc}`);
+              // Fall back to placeholder if image fails to load
+              setImageSrc('/images/placeholder-food.jpg');
+            }}
           />
         </div>
         

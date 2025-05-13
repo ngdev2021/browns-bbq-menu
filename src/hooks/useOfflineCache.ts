@@ -9,7 +9,7 @@ const SAMPLE_MENU_ITEMS = [
     description: 'Crispy chicken wings tossed in our signature buffalo sauce.',
     price: 12.99,
     category: 'appetizers',
-    image_url: LOCAL_IMAGES['buffalo-wings'],
+    image_url: '/images/placeholder-food.jpg', // Use placeholder for non-BBQ items
     tags: ['spicy', 'gluten-free'],
     stock: 20,
     featured: true
@@ -20,7 +20,7 @@ const SAMPLE_MENU_ITEMS = [
     description: 'Juicy beef patty with melted cheddar and special sauce.',
     price: 14.99,
     category: 'burgers',
-    image_url: LOCAL_IMAGES['burger'],
+    image_url: '/images/placeholder-food.jpg', // Use placeholder for non-BBQ items
     tags: [],
     stock: 15,
     featured: true
@@ -31,7 +31,7 @@ const SAMPLE_MENU_ITEMS = [
     description: 'Three corn tortillas with grilled vegetables and avocado.',
     price: 11.99,
     category: 'tacos',
-    image_url: LOCAL_IMAGES['caesar-salad'],
+    image_url: '/images/placeholder-food.jpg', // Use placeholder for non-BBQ items
     tags: ['vegetarian', 'gluten-free'],
     stock: 8,
     featured: false

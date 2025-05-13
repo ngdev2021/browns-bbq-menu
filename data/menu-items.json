@@ -1,0 +1,718 @@
+[
+  {
+    "id": "plate-1",
+    "name": "1-Meat Plate",
+    "description": "Your choice of 1 meat served with two sides.",
+    "price": 14.99,
+    "category": "plates",
+    "image_url": "/images/menu-items/brisket-plate.jpg",
+    "tags": [
+      "bbq",
+      "meat",
+      "plate"
+    ],
+    "stock": 100,
+    "featured": false,
+    "ingredients": [
+      "Your choice of meat",
+      "Two sides",
+      "BBQ sauce"
+    ],
+    "nutritionalInfo": {
+      "calories": 650,
+      "protein": 45,
+      "carbs": 25,
+      "fat": 38
+    },
+    "reviews": [
+      {
+        "id": "101",
+        "itemId": "1",
+        "userName": "BBQLover",
+        "rating": 5,
+        "comment": "Best brisket in town! Perfectly smoked and tender.",
+        "date": "2025-04-15T14:22:00Z"
+      },
+      {
+        "id": "102",
+        "itemId": "1",
+        "userName": "MeatFan",
+        "rating": 4,
+        "comment": "Really good brisket, melts in your mouth. Great sides too!",
+        "date": "2025-04-28T18:15:00Z"
+      }
+    ]
+  },
+  {
+    "id": "2",
+    "name": "Brisket Sandwich",
+    "description": "Tender smoked brisket served on a fresh bun with pickles and onions.",
+    "price": 12,
+    "category": "sandwiches",
+    "image_url": "/images/menu-items/brisket-sandwich.jpg",
+    "tags": [
+      "bbq",
+      "meat"
+    ],
+    "stock": 25,
+    "featured": true,
+    "ingredients": [
+      "Beef brisket",
+      "BBQ sauce",
+      "Bun",
+      "Pickles",
+      "Onions"
+    ],
+    "nutritionalInfo": {
+      "calories": 550,
+      "protein": 35,
+      "carbs": 45,
+      "fat": 25
+    },
+    "reviews": []
+  },
+  {
+    "id": "3",
+    "name": "Rib Plate",
+    "description": "Slow-smoked pork ribs with our signature dry rub, served with two sides.",
+    "price": 22,
+    "category": "plates",
+    "image_url": "/images/menu-items/ribs-plate.jpg",
+    "tags": [
+      "bbq",
+      "meat"
+    ],
+    "stock": 15,
+    "featured": false,
+    "ingredients": [
+      "Pork ribs",
+      "Dry rub",
+      "BBQ sauce"
+    ],
+    "nutritionalInfo": {
+      "calories": 750,
+      "protein": 48,
+      "carbs": 25,
+      "fat": 45
+    },
+    "reviews": [
+      {
+        "id": "301",
+        "itemId": "3",
+        "userName": "RibLover",
+        "rating": 5,
+        "comment": "Fall-off-the-bone tender! These ribs are amazing with the perfect amount of smoke.",
+        "date": "2025-04-10T12:30:00Z"
+      }
+    ]
+  },
+  {
+    "id": "4",
+    "name": "Rib Sandwich",
+    "description": "Tender rib meat served on a fresh bun with our signature sauce.",
+    "price": 12,
+    "category": "sandwiches",
+    "image_url": "/images/menu-items/ribs-sandwich.jpg",
+    "tags": [
+      "bbq",
+      "meat"
+    ],
+    "stock": 18,
+    "featured": false,
+    "ingredients": [
+      "Rib meat",
+      "BBQ sauce",
+      "Bun"
+    ],
+    "nutritionalInfo": {
+      "calories": 580,
+      "protein": 32,
+      "carbs": 45,
+      "fat": 28
+    },
+    "reviews": []
+  },
+  {
+    "id": "5",
+    "name": "Chicken Plate",
+    "description": "Smoked chicken with our signature seasoning, served with two sides.",
+    "price": 20,
+    "category": "plates",
+    "image_url": "/images/menu-items/chicken-plate.jpg",
+    "tags": [
+      "bbq",
+      "meat"
+    ],
+    "stock": 15,
+    "featured": false,
+    "ingredients": [
+      "Chicken",
+      "BBQ seasoning",
+      "BBQ sauce"
+    ],
+    "nutritionalInfo": {
+      "calories": 550,
+      "protein": 42,
+      "carbs": 25,
+      "fat": 30
+    },
+    "reviews": [
+      {
+        "id": "501",
+        "itemId": "5",
+        "userName": "ChickenFan",
+        "rating": 5,
+        "comment": "The chicken is so juicy and flavorful! Great with the sides.",
+        "date": "2025-04-18T15:30:00Z"
+      }
+    ]
+  },
+  {
+    "id": "6",
+    "name": "Chicken Sandwich",
+    "description": "Tender smoked chicken served on a fresh bun with our signature sauce.",
+    "price": 10,
+    "category": "sandwiches",
+    "image_url": "/images/menu-items/chicken-sandwich.jpg",
+    "tags": [
+      "bbq",
+      "meat"
+    ],
+    "stock": 20,
+    "featured": false,
+    "ingredients": [
+      "Chicken",
+      "BBQ sauce",
+      "Bun"
+    ],
+    "nutritionalInfo": {
+      "calories": 480,
+      "protein": 35,
+      "carbs": 40,
+      "fat": 22
+    },
+    "reviews": []
+  },
+  {
+    "id": "7",
+    "name": "Stuffed Turkey Leg",
+    "description": "Giant smoked turkey leg stuffed with your choice of cornbread dressing or dirty rice.",
+    "price": 20,
+    "category": "plates",
+    "image_url": "/images/menu-items/turkey-leg.jpg",
+    "tags": [
+      "bbq",
+      "meat",
+      "specialty"
+    ],
+    "stock": 10,
+    "featured": true,
+    "ingredients": [
+      "Smoked turkey leg",
+      "Choice of stuffing: cornbread dressing or dirty rice",
+      "Special seasonings",
+      "BBQ sauce"
+    ],
+    "nutritionalInfo": {
+      "calories": 650,
+      "protein": 55,
+      "carbs": 5,
+      "fat": 40
+    },
+    "reviews": [
+      {
+        "id": "701",
+        "itemId": "7",
+        "userName": "TurkeyFan",
+        "rating": 5,
+        "comment": "This turkey leg is massive and so flavorful! Great for sharing.",
+        "date": "2025-04-20T14:15:00Z"
+      }
+    ]
+  },
+  {
+    "id": "8",
+    "name": "Loaded Baked Potato",
+    "description": "Jumbo baked potato loaded with butter, sour cream, cheese, chives, and your choice of brisket, pulled pork, or chicken.",
+    "price": 20,
+    "category": "plates",
+    "image_url": "/images/menu-items/baked-potato.jpg",
+    "tags": [
+      "entree"
+    ],
+    "stock": 15,
+    "featured": true,
+    "ingredients": [
+      "Jumbo potato",
+      "Butter",
+      "Sour cream",
+      "Cheese",
+      "Chives",
+      "Choice of meat (brisket, pulled pork, or chicken)"
+    ],
+    "nutritionalInfo": {
+      "calories": 750,
+      "protein": 25,
+      "carbs": 65,
+      "fat": 45
+    },
+    "reviews": []
+  },
+  {
+    "id": "9",
+    "name": "Pork Chops Plate",
+    "description": "Grilled pork chops with our signature seasoning, served with two sides.",
+    "price": 20,
+    "category": "plates",
+    "image_url": "/images/menu-items/pork-chops.jpg",
+    "tags": [
+      "bbq",
+      "meat"
+    ],
+    "stock": 12,
+    "featured": false,
+    "ingredients": [
+      "Pork chops",
+      "BBQ seasoning"
+    ],
+    "nutritionalInfo": {
+      "calories": 650,
+      "protein": 45,
+      "carbs": 25,
+      "fat": 40
+    },
+    "reviews": []
+  },
+  {
+    "id": "11",
+    "name": "Link Plate",
+    "description": "Smoked sausage links with our signature seasoning, served with two sides.",
+    "price": 20,
+    "category": "plates",
+    "image_url": "/images/menu-items/links-plate.jpg",
+    "tags": [
+      "bbq",
+      "meat"
+    ],
+    "stock": 18,
+    "featured": true,
+    "ingredients": [
+      "Sausage links",
+      "BBQ seasoning"
+    ],
+    "nutritionalInfo": {
+      "calories": 680,
+      "protein": 35,
+      "carbs": 25,
+      "fat": 50
+    },
+    "reviews": []
+  },
+  {
+    "id": "13",
+    "name": "2 Meats + Sides",
+    "description": "Your choice of any two meats served with sides (beans, potato salad, dirty rice).",
+    "price": 24,
+    "category": "combos",
+    "image_url": "/images/menu-items/combo-plate.jpg",
+    "tags": [
+      "bbq",
+      "meat",
+      "combo"
+    ],
+    "stock": 25,
+    "featured": false,
+    "ingredients": [
+      "Choice of meats",
+      "Beans",
+      "Potato salad",
+      "Dirty rice"
+    ],
+    "nutritionalInfo": {
+      "calories": 950,
+      "protein": 65,
+      "carbs": 70,
+      "fat": 55
+    },
+    "reviews": []
+  },
+  {
+    "id": "14",
+    "name": "3 Meats + Sides",
+    "description": "Your choice of any three meats served with sides (beans, potato salad, dirty rice).",
+    "price": 28,
+    "category": "combos",
+    "image_url": "/images/menu-items/combo-plate.jpg",
+    "tags": [
+      "bbq",
+      "meat",
+      "combo"
+    ],
+    "stock": 20,
+    "featured": false,
+    "ingredients": [
+      "Choice of meats",
+      "Beans",
+      "Potato salad",
+      "Dirty rice"
+    ],
+    "nutritionalInfo": {
+      "calories": 1200,
+      "protein": 85,
+      "carbs": 75,
+      "fat": 70
+    },
+    "reviews": []
+  },
+  {
+    "id": "15",
+    "name": "4 Meats + Sides",
+    "description": "Your choice of any four meats served with sides (beans, potato salad, dirty rice).",
+    "price": 32,
+    "category": "combos",
+    "image_url": "/images/menu-items/combo-plate.jpg",
+    "tags": [
+      "bbq",
+      "meat",
+      "combo"
+    ],
+    "stock": 15,
+    "featured": true,
+    "ingredients": [
+      "Choice of meats",
+      "Beans",
+      "Potato salad",
+      "Dirty rice"
+    ],
+    "nutritionalInfo": {
+      "calories": 1450,
+      "protein": 105,
+      "carbs": 80,
+      "fat": 85
+    },
+    "reviews": []
+  },
+  {
+    "id": "16",
+    "name": "Beans",
+    "description": "Slow-cooked beans with special seasonings and smoked meat.",
+    "price": 4.25,
+    "category": "sides",
+    "image_url": "/images/menu-items/beans.jpg",
+    "tags": [
+      "side"
+    ],
+    "stock": 30,
+    "featured": false,
+    "ingredients": [
+      "Beans",
+      "Seasonings",
+      "Smoked meat"
+    ],
+    "nutritionalInfo": {
+      "calories": 220,
+      "protein": 12,
+      "carbs": 35,
+      "fat": 5
+    },
+    "sizes": [
+      {
+        "size": "5 oz.",
+        "price": 4.25
+      },
+      {
+        "size": "Pint",
+        "price": 9
+      },
+      {
+        "size": "Quart",
+        "price": 17
+      },
+      {
+        "size": "Gallon",
+        "price": 45
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "id": "17",
+    "name": "Potato Salad",
+    "description": "Homemade potato salad with our special recipe.",
+    "price": 4.25,
+    "category": "sides",
+    "image_url": "/images/menu-items/potato-salad.jpg",
+    "tags": [
+      "side",
+      "vegetarian"
+    ],
+    "stock": 25,
+    "featured": false,
+    "ingredients": [
+      "Potatoes",
+      "Mayonnaise",
+      "Mustard",
+      "Eggs",
+      "Seasonings"
+    ],
+    "nutritionalInfo": {
+      "calories": 250,
+      "protein": 5,
+      "carbs": 30,
+      "fat": 15
+    },
+    "sizes": [
+      {
+        "size": "5 oz.",
+        "price": 4.25
+      },
+      {
+        "size": "Pint",
+        "price": 9
+      },
+      {
+        "size": "Quart",
+        "price": 17
+      },
+      {
+        "size": "Gallon",
+        "price": 45
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "id": "18",
+    "name": "Dirty Rice",
+    "description": "Flavorful rice cooked with meat, vegetables, and special seasonings.",
+    "price": 4.25,
+    "category": "sides",
+    "image_url": "/images/menu-items/dirty-rice.jpg",
+    "tags": [
+      "side"
+    ],
+    "stock": 25,
+    "featured": false,
+    "ingredients": [
+      "Rice",
+      "Meat",
+      "Vegetables",
+      "Seasonings"
+    ],
+    "nutritionalInfo": {
+      "calories": 280,
+      "protein": 8,
+      "carbs": 45,
+      "fat": 8
+    },
+    "sizes": [
+      {
+        "size": "5 oz.",
+        "price": 4.25
+      },
+      {
+        "size": "Pint",
+        "price": 9
+      },
+      {
+        "size": "Quart",
+        "price": 17
+      },
+      {
+        "size": "Gallon",
+        "price": 45
+      }
+    ],
+    "reviews": []
+  },
+  {
+    "id": "drink-1",
+    "name": "Coca-Cola",
+    "description": "Classic Coca-Cola in a 20oz bottle",
+    "price": 2.49,
+    "category": "drinks",
+    "image_url": "/images/drinks/placeholder-drink.svg",
+    "tags": [
+      "drinks",
+      "soda"
+    ],
+    "stock": 100,
+    "featured": false
+  },
+  {
+    "id": "drink-2",
+    "name": "Diet Coke",
+    "description": "Diet Coca-Cola in a 20oz bottle",
+    "price": 2.49,
+    "category": "drinks",
+    "image_url": "/images/drinks/placeholder-drink.svg",
+    "tags": [
+      "drinks",
+      "soda",
+      "diet"
+    ],
+    "stock": 100,
+    "featured": false
+  },
+  {
+    "id": "drink-3",
+    "name": "Coke Zero",
+    "description": "Zero sugar Coca-Cola with the same great taste",
+    "price": 2.49,
+    "category": "drinks",
+    "image_url": "/images/drinks/placeholder-drink.svg",
+    "tags": [
+      "drinks",
+      "soda",
+      "diet"
+    ],
+    "stock": 100,
+    "featured": false
+  },
+  {
+    "id": "drink-4",
+    "name": "Sprite",
+    "description": "Crisp, refreshing lemon-lime flavor in a 20oz bottle",
+    "price": 2.49,
+    "category": "drinks",
+    "image_url": "/images/drinks/placeholder-drink.svg",
+    "tags": [
+      "drinks",
+      "soda"
+    ],
+    "stock": 100,
+    "featured": false
+  },
+  {
+    "id": "drink-5",
+    "name": "Dr Pepper",
+    "description": "Dr Pepper in a 20oz bottle",
+    "price": 2.49,
+    "category": "drinks",
+    "image_url": "/images/drinks/placeholder-drink.svg",
+    "tags": [
+      "drinks",
+      "soda"
+    ],
+    "stock": 100,
+    "featured": false
+  },
+  {
+    "id": "drink-6",
+    "name": "Fanta Orange",
+    "description": "Bright, bubbly orange-flavored soda",
+    "price": 2.49,
+    "category": "drinks",
+    "image_url": "/images/drinks/placeholder-drink.svg",
+    "tags": [
+      "drinks",
+      "soda"
+    ],
+    "stock": 100,
+    "featured": false
+  },
+  {
+    "id": "drink-7",
+    "name": "Sweet Tea",
+    "description": "Southern-style sweet tea",
+    "price": 2.49,
+    "category": "drinks",
+    "image_url": "/images/drinks/placeholder-drink.svg",
+    "tags": [
+      "drinks",
+      "tea"
+    ],
+    "stock": 100,
+    "featured": false
+  },
+  {
+    "id": "drink-8",
+    "name": "Unsweet Tea",
+    "description": "Fresh brewed unsweetened tea",
+    "price": 2.49,
+    "category": "drinks",
+    "image_url": "/images/drinks/placeholder-drink.svg",
+    "tags": [
+      "drinks",
+      "tea"
+    ],
+    "stock": 100,
+    "featured": false
+  },
+  {
+    "id": "drink-9",
+    "name": "Half & Half Tea",
+    "description": "Half sweet tea, half lemonade - a refreshing combination",
+    "price": 2.49,
+    "category": "drinks",
+    "image_url": "/images/drinks/placeholder-drink.svg",
+    "tags": [
+      "drinks",
+      "tea",
+      "lemonade"
+    ],
+    "stock": 100,
+    "featured": false
+  },
+  {
+    "id": "drink-10",
+    "name": "Lemonade",
+    "description": "Fresh-squeezed style lemonade",
+    "price": 2.49,
+    "category": "drinks",
+    "image_url": "/images/drinks/placeholder-drink.svg",
+    "tags": [
+      "drinks",
+      "lemonade"
+    ],
+    "stock": 100,
+    "featured": false
+  },
+  {
+    "id": "drink-11",
+    "name": "Strawberry Lemonade",
+    "description": "Lemonade with a sweet strawberry twist",
+    "price": 2.99,
+    "category": "drinks",
+    "image_url": "/images/drinks/placeholder-drink.svg",
+    "tags": [
+      "drinks",
+      "lemonade"
+    ],
+    "stock": 100,
+    "featured": false
+  },
+  {
+    "id": "drink-12",
+    "name": "Bottled Water",
+    "description": "Purified bottled water",
+    "price": 1.99,
+    "category": "drinks",
+    "image_url": "/images/drinks/placeholder-drink.svg",
+    "tags": [
+      "drinks",
+      "water"
+    ],
+    "stock": 100,
+    "featured": false
+  },
+  {
+    "id": "NaN",
+    "name": "Peach Cobbler",
+    "description": "Golden, buttery crust hugging a slow-simmered filling of ripe, juicy peaches kissed with cinnamon and brown sugar. Baked to bubbling perfection and served warm like grandma used to make — sweet, soulful, and straight from the heart of the South.",
+    "price": 7,
+    "category": "desserts",
+    "image_url": "/uploads/1747132509105.jpg",
+    "tags": [],
+    "stock": 10,
+    "featured": false,
+    "ingredients": [],
+    "nutritionalInfo": {
+      "calories": 0,
+      "protein": 0,
+      "carbs": 0,
+      "fat": 0
+    },
+    "reviews": []
+  }
+]

@@ -1,4 +1,5 @@
 import { SAMPLE_MENU_ITEMS } from '../data/sampleData';
+import axios from 'axios';
 
 // Define types for our menu items
 export interface MenuItem {
@@ -69,8 +70,36 @@ const DEFAULT_DIGITAL_MENU_SETTINGS: DigitalMenuSettings = {
   featuredItemIds: SAMPLE_MENU_ITEMS.filter(item => item.featured).map(item => item.id)
 };
 
-// Get menu items from local storage or use sample data
-export const getMenuItems = (): MenuItem[] => {
+// Get menu items from server, local storage, or use sample data
+export const getMenuItems = async (): Promise<MenuItem[]> => {
+  try {
+    // Try to get data from server first
+    try {
+      // Use window.location.origin to ensure we're using the correct port
+      const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+      const response = await axios.get(`${baseUrl}/api/menu?type=menu`);
+      if (response.data.success) {
+        // Save to local storage as a backup
+        localStorage.setItem('bbq_menu_items', JSON.stringify(response.data.data));
+        return response.data.data;
+      }
+    } catch (serverError) {
+      console.log('Could not fetch from server, falling back to local storage');
+    }
+
+    // If server fails, try local storage
+    const storedItems = localStorage.getItem('bbq_menu_items');
+    if (storedItems) {
+      return JSON.parse(storedItems);
+    }
+  } catch (error) {
+    console.error('Failed to load menu items:', error);
+  }
+  return SAMPLE_MENU_ITEMS;
+};
+
+// Synchronous version for immediate UI rendering
+export const getMenuItemsSync = (): MenuItem[] => {
   try {
     const storedItems = localStorage.getItem('bbq_menu_items');
     if (storedItems) {
@@ -82,17 +111,62 @@ export const getMenuItems = (): MenuItem[] => {
   return SAMPLE_MENU_ITEMS;
 };
 
-// Save menu items to local storage
-export const saveMenuItems = (items: MenuItem[]): void => {
+// Save menu items to server and local storage
+export const saveMenuItems = async (items: MenuItem[]): Promise<boolean> => {
   try {
+    // Save to local storage first as a backup
     localStorage.setItem('bbq_menu_items', JSON.stringify(items));
+    
+    // Then save to server
+    try {
+      // Use window.location.origin to ensure we're using the correct port
+      const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+      const response = await axios.post(`${baseUrl}/api/menu`, {
+        type: 'menu',
+        data: items
+      });
+      return response.data.success;
+    } catch (serverError) {
+      console.error('Failed to save menu items to server:', serverError);
+      // Still return true if we saved to local storage
+      return true;
+    }
   } catch (error) {
-    console.error('Failed to save menu items to storage:', error);
+    console.error('Failed to save menu items:', error);
+    return false;
   }
 };
 
-// Get business settings from local storage or use defaults
-export const getBusinessSettings = (): BusinessSettings => {
+// Get business settings from server, local storage, or use defaults
+export const getBusinessSettings = async (): Promise<BusinessSettings> => {
+  try {
+    // Try to get data from server first
+    try {
+      // Use window.location.origin to ensure we're using the correct port
+      const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+      const response = await axios.get(`${baseUrl}/api/menu?type=business`);
+      if (response.data.success) {
+        // Save to local storage as a backup
+        localStorage.setItem('bbq_business_settings', JSON.stringify(response.data.data));
+        return response.data.data;
+      }
+    } catch (serverError) {
+      console.log('Could not fetch business settings from server, falling back to local storage');
+    }
+
+    // If server fails, try local storage
+    const storedSettings = localStorage.getItem('bbq_business_settings');
+    if (storedSettings) {
+      return JSON.parse(storedSettings);
+    }
+  } catch (error) {
+    console.error('Failed to load business settings:', error);
+  }
+  return DEFAULT_BUSINESS_SETTINGS;
+};
+
+// Synchronous version for immediate UI rendering
+export const getBusinessSettingsSync = (): BusinessSettings => {
   try {
     const storedSettings = localStorage.getItem('bbq_business_settings');
     if (storedSettings) {
@@ -104,17 +178,62 @@ export const getBusinessSettings = (): BusinessSettings => {
   return DEFAULT_BUSINESS_SETTINGS;
 };
 
-// Save business settings to local storage
-export const saveBusinessSettings = (settings: BusinessSettings): void => {
+// Save business settings to server and local storage
+export const saveBusinessSettings = async (settings: BusinessSettings): Promise<boolean> => {
   try {
+    // Save to local storage first as a backup
     localStorage.setItem('bbq_business_settings', JSON.stringify(settings));
+    
+    // Then save to server
+    try {
+      // Use window.location.origin to ensure we're using the correct port
+      const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+      const response = await axios.post(`${baseUrl}/api/menu`, {
+        type: 'business',
+        data: settings
+      });
+      return response.data.success;
+    } catch (serverError) {
+      console.error('Failed to save business settings to server:', serverError);
+      // Still return true if we saved to local storage
+      return true;
+    }
   } catch (error) {
-    console.error('Failed to save business settings to storage:', error);
+    console.error('Failed to save business settings:', error);
+    return false;
   }
 };
 
-// Get digital menu settings from local storage or use defaults
-export const getDigitalMenuSettings = (): DigitalMenuSettings => {
+// Get digital menu settings from server, local storage, or use defaults
+export const getDigitalMenuSettings = async (): Promise<DigitalMenuSettings> => {
+  try {
+    // Try to get data from server first
+    try {
+      // Use window.location.origin to ensure we're using the correct port
+      const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+      const response = await axios.get(`${baseUrl}/api/menu?type=digital`);
+      if (response.data.success) {
+        // Save to local storage as a backup
+        localStorage.setItem('bbq_digital_menu_settings', JSON.stringify(response.data.data));
+        return response.data.data;
+      }
+    } catch (serverError) {
+      console.log('Could not fetch digital menu settings from server, falling back to local storage');
+    }
+
+    // If server fails, try local storage
+    const storedSettings = localStorage.getItem('bbq_digital_menu_settings');
+    if (storedSettings) {
+      return JSON.parse(storedSettings);
+    }
+  } catch (error) {
+    console.error('Failed to load digital menu settings:', error);
+  }
+  return DEFAULT_DIGITAL_MENU_SETTINGS;
+};
+
+// Synchronous version for immediate UI rendering
+export const getDigitalMenuSettingsSync = (): DigitalMenuSettings => {
   try {
     const storedSettings = localStorage.getItem('bbq_digital_menu_settings');
     if (storedSettings) {
@@ -126,54 +245,94 @@ export const getDigitalMenuSettings = (): DigitalMenuSettings => {
   return DEFAULT_DIGITAL_MENU_SETTINGS;
 };
 
-// Save digital menu settings to local storage
-export const saveDigitalMenuSettings = (settings: DigitalMenuSettings): void => {
+// Save digital menu settings to server and local storage
+export const saveDigitalMenuSettings = async (settings: DigitalMenuSettings): Promise<boolean> => {
   try {
+    // Save to local storage first as a backup
     localStorage.setItem('bbq_digital_menu_settings', JSON.stringify(settings));
+    
+    // Then save to server
+    try {
+      // Use window.location.origin to ensure we're using the correct port
+      const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+      const response = await axios.post(`${baseUrl}/api/menu`, {
+        type: 'digital',
+        data: settings
+      });
+      return response.data.success;
+    } catch (serverError) {
+      console.error('Failed to save digital menu settings to server:', serverError);
+      // Still return true if we saved to local storage
+      return true;
+    }
   } catch (error) {
-    console.error('Failed to save digital menu settings to storage:', error);
+    console.error('Failed to save digital menu settings:', error);
+    return false;
   }
 };
 
 // Add a new menu item
-export const addMenuItem = (item: MenuItem): MenuItem[] => {
-  const items = getMenuItems();
+export const addMenuItem = async (item: MenuItem): Promise<MenuItem[]> => {
+  const items = await getMenuItems();
   const newItems = [...items, item];
-  saveMenuItems(newItems);
+  await saveMenuItems(newItems);
   return newItems;
 };
 
 // Update an existing menu item
-export const updateMenuItem = (item: MenuItem): MenuItem[] => {
-  const items = getMenuItems();
+export const updateMenuItem = async (item: MenuItem): Promise<MenuItem[]> => {
+  const items = await getMenuItems();
   const newItems = items.map(i => i.id === item.id ? item : i);
-  saveMenuItems(newItems);
+  await saveMenuItems(newItems);
   return newItems;
 };
 
 // Delete a menu item
-export const deleteMenuItem = (id: string): MenuItem[] => {
-  const items = getMenuItems();
+export const deleteMenuItem = async (id: string): Promise<MenuItem[]> => {
+  const items = await getMenuItems();
   const newItems = items.filter(i => i.id !== id);
-  saveMenuItems(newItems);
+  await saveMenuItems(newItems);
   return newItems;
 };
 
 // Get menu items by category
-export const getMenuItemsByCategory = (category: string): MenuItem[] => {
-  const items = getMenuItems();
+export const getMenuItemsByCategory = async (category: string): Promise<MenuItem[]> => {
+  const items = await getMenuItems();
+  return category === 'all' ? items : items.filter(item => item.category === category);
+};
+
+// Synchronous version for immediate UI rendering
+export const getMenuItemsByCategorySync = (category: string): MenuItem[] => {
+  const items = getMenuItemsSync();
   return category === 'all' ? items : items.filter(item => item.category === category);
 };
 
 // Get featured menu items
-export const getFeaturedMenuItems = (): MenuItem[] => {
-  const items = getMenuItems();
+export const getFeaturedMenuItems = async (): Promise<MenuItem[]> => {
+  const items = await getMenuItems();
+  return items.filter(item => item.featured);
+};
+
+// Synchronous version for immediate UI rendering
+export const getFeaturedMenuItemsSync = (): MenuItem[] => {
+  const items = getMenuItemsSync();
   return items.filter(item => item.featured);
 };
 
 // Search menu items
-export const searchMenuItems = (query: string): MenuItem[] => {
-  const items = getMenuItems();
+export const searchMenuItems = async (query: string): Promise<MenuItem[]> => {
+  const items = await getMenuItems();
+  const lowerQuery = query.toLowerCase();
+  return items.filter(item => 
+    item.name.toLowerCase().includes(lowerQuery) || 
+    item.description.toLowerCase().includes(lowerQuery) ||
+    item.tags.some(tag => tag.toLowerCase().includes(lowerQuery))
+  );
+};
+
+// Synchronous version for immediate UI rendering
+export const searchMenuItemsSync = (query: string): MenuItem[] => {
+  const items = getMenuItemsSync();
   const lowerQuery = query.toLowerCase();
   return items.filter(item => 
     item.name.toLowerCase().includes(lowerQuery) || 

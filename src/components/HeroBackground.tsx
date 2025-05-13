@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useEffect, useState } from 'react';
 
 interface HeroBackgroundProps {
   videoSrc?: string;
@@ -6,10 +6,21 @@ interface HeroBackgroundProps {
 }
 
 const HeroBackground: React.FC<HeroBackgroundProps> = ({ videoSrc, children }) => {
+  const [fullVideoSrc, setFullVideoSrc] = useState<string>('');
+  const [isMounted, setIsMounted] = useState(false);
+  
+  useEffect(() => {
+    setIsMounted(true);
+    if (videoSrc) {
+      // Use window.location.origin to ensure we're using the correct port
+      const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+      setFullVideoSrc(`${baseUrl}${videoSrc}`);
+    }
+  }, [videoSrc]);
   return (
     <div className="relative w-full h-screen overflow-hidden">
-      {/* Video Background */}
-      {videoSrc && (
+      {/* Video Background - only render on client side */}
+      {isMounted && fullVideoSrc && (
         <video 
           autoPlay 
           loop 
@@ -17,7 +28,7 @@ const HeroBackground: React.FC<HeroBackgroundProps> = ({ videoSrc, children }) =
           playsInline
           className="absolute inset-0 object-cover w-full h-full"
         >
-          <source src={videoSrc} type="video/mp4" />
+          <source src={fullVideoSrc} type="video/mp4" />
           Your browser does not support the video tag.
         </video>
       )}

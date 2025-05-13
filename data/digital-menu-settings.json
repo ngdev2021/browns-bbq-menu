@@ -1,0 +1,12 @@
+{
+  "defaultView": "menu",
+  "rotationInterval": 8,
+  "autoFullscreen": false,
+  "featuredItemIds": [
+    "2",
+    "7",
+    "8",
+    "11",
+    "15"
+  ]
+}

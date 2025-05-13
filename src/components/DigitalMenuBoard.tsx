@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { getMenuItems, getDigitalMenuSettings, getFeaturedMenuItems, MenuItem } from '../lib/menuService';
+import { getMenuItemsSync, getDigitalMenuSettingsSync, getFeaturedMenuItemsSync, MenuItem } from '../lib/menuService';
+import { getMenuItemImagePath, getCacheBustedImageUrl } from '../lib/imageUtils';
 
 interface DigitalMenuBoardProps {
   view?: 'menu' | 'specials' | 'combos';
@@ -9,16 +10,35 @@ const DigitalMenuBoard: React.FC<DigitalMenuBoardProps> = ({ view = 'menu' }) =>
   const [currentTime, setCurrentTime] = useState(new Date());
   const [currentSpecialIndex, setCurrentSpecialIndex] = useState(0);
   
-  // Featured items for rotating specials
-  const [menuItems, setMenuItems] = useState<MenuItem[]>(getMenuItems());
-  const [featuredItems, setFeaturedItems] = useState<MenuItem[]>(getFeaturedMenuItems());
-  const [settings, setSettings] = useState(getDigitalMenuSettings());
+  // Featured items for rotating specials - use sync versions for initial render
+  const [menuItems, setMenuItems] = useState<MenuItem[]>(getMenuItemsSync());
+  const [featuredItems, setFeaturedItems] = useState<MenuItem[]>(getFeaturedMenuItemsSync());
+  const [settings, setSettings] = useState(getDigitalMenuSettingsSync());
   
   // Refresh menu data when component mounts
   useEffect(() => {
-    setMenuItems(getMenuItems());
-    setFeaturedItems(getFeaturedMenuItems());
-    setSettings(getDigitalMenuSettings());
+    const loadData = async () => {
+      try {
+        // Fetch data from the server
+        const fetchMenuItems = import('../lib/menuService').then(module => module.getMenuItems());
+        const fetchFeaturedItems = import('../lib/menuService').then(module => module.getFeaturedMenuItems());
+        const fetchSettings = import('../lib/menuService').then(module => module.getDigitalMenuSettings());
+        
+        const [menuItemsData, featuredItemsData, settingsData] = await Promise.all([
+          fetchMenuItems,
+          fetchFeaturedItems,
+          fetchSettings
+        ]);
+        
+        setMenuItems(menuItemsData);
+        setFeaturedItems(featuredItemsData);
+        setSettings(settingsData);
+      } catch (error) {
+        console.error('Failed to load data from server:', error);
+      }
+    };
+    
+    loadData();
   }, []);
   
   // Update time every minute
@@ -86,8 +106,12 @@ const DigitalMenuBoard: React.FC<DigitalMenuBoardProps> = ({ view = 'menu' }) =>
         <div className="flex items-center">
           <div className="relative w-32 h-32 rounded-lg overflow-hidden mr-4">
             <img 
-              src={currentSpecial.image_url} 
+              src={getCacheBustedImageUrl(getMenuItemImagePath(currentSpecial.image_url))} 
               alt={currentSpecial.name}
+              onError={(e) => {
+                // Fall back to placeholder if image fails to load
+                (e.target as HTMLImageElement).src = '/images/placeholder-food.jpg';
+              }}
               className="object-cover w-full h-full"
             />
           </div>
@@ -158,8 +182,12 @@ const DigitalMenuBoard: React.FC<DigitalMenuBoardProps> = ({ view = 'menu' }) =>
               <div key={special.id} className="bg-gradient-to-r from-amber-900 to-amber-800 p-4 rounded-lg flex">
                 <div className="relative w-32 h-32 rounded-lg overflow-hidden mr-4 flex-shrink-0">
                   <img 
-                    src={special.image_url} 
+                    src={getCacheBustedImageUrl(getMenuItemImagePath(special.image_url))} 
                     alt={special.name}
+                    onError={(e) => {
+                      // Fall back to placeholder if image fails to load
+                      (e.target as HTMLImageElement).src = '/images/placeholder-food.jpg';
+                    }}
                     className="object-cover w-full h-full"
                   />
                 </div>
